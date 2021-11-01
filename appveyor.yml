@@ -42,7 +42,7 @@ init:
 install:
   - mkdir build
   - cd build
-  - cmake -G Ninja -DCMAKE_BUILD_TYPE=%CONFIGURATION% -DKDBindings_TESTS=True -DKDBindings_EXAMPLES=True ..
+  - cmake -G Ninja -DKDBindings_TESTS=True -DKDBindings_EXAMPLES=True ..
   - cmake --build .
   - cmake --build . --target install
 
