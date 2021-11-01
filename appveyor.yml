@@ -40,6 +40,9 @@ configuration:
   - Release
   - Debug
 
+install:
+  - sh: if [ "`uname -s`" = "Darwin" ]; then brew install ninja; fi
+
 build_script:
   - mkdir build
   - cd build
