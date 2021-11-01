@@ -23,6 +23,10 @@ image:
   - Visual Studio 2019
   - Ubuntu
 
+# scripts that are called at very beginning, before repo cloning
+init:
+  - git config --global core.autocrlf input
+
 #---------------------------------#
 #       build configuration       #
 #---------------------------------#
@@ -39,12 +43,15 @@ configuration:
 init:
   - cmd: call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvars64.bat"
 
-install:
+build_script:
   - mkdir build
   - cd build
-  - cmake -G Ninja -DKDBindings_TESTS=True -DKDBindings_EXAMPLES=True ..
+  - cmd: cmake -G Ninja -DCMAKE_BUILD_TYPE=%CONFIGURATION% -DKDBindings_TESTS=True -DKDBindings_EXAMPLES=True ..
+  - sh: cmake -G Ninja -DCMAKE_BUILD_TYPE=$CONFIGURATION -DKDBindings_TESTS=True -DKDBindings_EXAMPLES=True ..
   - cmake --build .
-  - cmake --build . --target install
+  - cmd: cmake --build . --target install
+  - sh: sudo cmake --build . --target install
+  - ctest --test-dir .
 
 # to disable automatic builds
 #build: off
@@ -53,11 +60,8 @@ install:
 #       tests configuration       #
 #---------------------------------#
 
-test_script:
-  - ctest --test-dir .
-
 # to disable automatic tests
-#test: off
+test: off
 
 
 #---------------------------------#
