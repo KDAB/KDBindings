@@ -41,8 +41,8 @@ Contact KDAB at <info@kdab.com> if you need different licensing options.
 
 KDBindings includes these source files, also available under the terms of the MIT license:
 
-* doctest.h - the lightest feature-rich C++ single-header testing framework for unit tests and TDD (C) 2016-2021 Viktor Kirilov <vik.kirilov@gmail.com>
-* genindex_array.h (C) 2021 Jeremy Burns (adapted by KDAB for KDBindings)
+* [doctest.h](https://github.com/onqtam/doctest) - the lightest feature-rich C++ single-header testing framework for unit tests and TDD (C) 2016-2021 Viktor Kirilov <vik.kirilov@gmail.com>
+* [genindex_array.h](https://gist.github.com/jaburns/ca72487198832f6203e831133ffdfff4) (C) 2021 Jeremy Burns (adapted by KDAB for KDBindings)
 
 Get Involved
 ============
