@@ -19,11 +19,9 @@ skip_tags: false
 
 # Build worker image
 image:
+  - macos
   - Visual Studio 2019
-
-# scripts that are called at very beginning, before repo cloning
-init:
-  - git config --global core.autocrlf input
+  - Ubuntu
 
 #---------------------------------#
 #       build configuration       #
@@ -31,19 +29,22 @@ init:
 
 # build platform, i.e. x86, x64, Any CPU. This setting is optional.
 platform:
-  - x64
+  - Any CPU
 
 # build Configuration, i.e. Debug, Release, etc.
 configuration:
   - Release
+  - Debug
+
+init:
+  - cmd: call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvars64.bat"
 
 install:
-  - call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvars64.bat"
-build_script:
   - mkdir build
   - cd build
-  - cmake -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=%CONFIGURATION% -DKDBindings_TESTS=True -DKDBindings_EXAMPLES=True ..
-  - nmake
+  - cmake -G Ninja -DCMAKE_BUILD_TYPE=%CONFIGURATION% -DKDBindings_TESTS=True -DKDBindings_EXAMPLES=True ..
+  - cmake --build .
+  - cmake --build . --target install
 
 # to disable automatic builds
 #build: off
@@ -53,7 +54,7 @@ build_script:
 #---------------------------------#
 
 test_script:
-  - nmake test
+  - ctest --test-dir .
 
 # to disable automatic tests
 #test: off
