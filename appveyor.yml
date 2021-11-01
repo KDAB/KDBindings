@@ -19,7 +19,9 @@ skip_tags: false
 
 # Build worker image
 image:
+  - macos
   - Visual Studio 2019
+  - Ubuntu
 
 # scripts that are called at very beginning, before repo cloning
 init:
@@ -31,19 +33,25 @@ init:
 
 # build platform, i.e. x86, x64, Any CPU. This setting is optional.
 platform:
-  - x64
+  - Any CPU
 
 # build Configuration, i.e. Debug, Release, etc.
 configuration:
   - Release
+  - Debug
 
 install:
-  - call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvars64.bat"
+  - sh: if [ "`uname -s`" = "Darwin" ]; then brew install ninja; fi
+
 build_script:
   - mkdir build
   - cd build
-  - cmake -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=%CONFIGURATION% -DKDBindings_TESTS=True -DKDBindings_EXAMPLES=True ..
-  - nmake
+  - cmd: cmake -G Ninja -DCMAKE_BUILD_TYPE=%CONFIGURATION% -DKDBindings_TESTS=True -DKDBindings_EXAMPLES=True ..
+  - sh: cmake -G Ninja -DCMAKE_BUILD_TYPE=$CONFIGURATION -DKDBindings_TESTS=True -DKDBindings_EXAMPLES=True ..
+  - cmake --build .
+  - cmd: cmake --build . --target install
+  - sh: sudo cmake --build . --target install
+  - ctest --test-dir .
 
 # to disable automatic builds
 #build: off
@@ -52,11 +60,8 @@ build_script:
 #       tests configuration       #
 #---------------------------------#
 
-test_script:
-  - nmake test
-
 # to disable automatic tests
-#test: off
+test: off
 
 
 #---------------------------------#
