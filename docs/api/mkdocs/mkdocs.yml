@@ -1,5 +1,5 @@
 site_name: KDBindings - Bindings from the comfort and speed of C++
-site_url: https://ci-artifacts.kdab.com/docs/kdbindings/
+site_url: https://docs.kdab.com/kdbindings/latest/
 repo_url: https://github.com/kdab/kdbindings
 site_description: KDBindings Documentation - Bindings from the comfort and speed of C++
 site_author: Klarälvdalens Datakonsult AB (KDAB)
