@@ -1,5 +1,5 @@
 {
-  "baseUrl": "/docs/kdbindings/",
+  "baseUrl": "/kdbindings/${CMAKE_PROJECT_VERSION}/",
   "indexInFolders": false,
   "linkSuffix": "/",
   "mainPageInRoot": true,
