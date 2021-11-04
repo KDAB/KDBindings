@@ -43,7 +43,7 @@ ecm_setup_version(
   ${PROJECT_VERSION}
   VARIABLE_PREFIX KDBINDINGS
   VERSION_HEADER "${CMAKE_BINARY_DIR}/kdbindings_version.h"
-  PACKAGE_VERSION_FILE "${CMAKE_BINARY_DIR}/KDBindingsConfigVersion.cmake"
+  PACKAGE_VERSION_FILE "${PROJECT_BINARY_DIR}/KDBindingsConfigVersion.cmake"
   COMPATIBILITY AnyNewerVersion
 )
 install(FILES "${CMAKE_BINARY_DIR}/kdbindings_version.h" DESTINATION ${INSTALL_INCLUDE_DIR}/kdbindings)
