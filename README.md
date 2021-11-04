@@ -18,7 +18,7 @@ KDBindings requires a C++ compiler with C++17 support.
 
 Find more information at:
 
- * [detailed browsable API reference](https://docs.kdab.com/kdbindings/getting-started)
+ * [detailed browsable API reference](https://docs.kdab.com/kdbindings/latest/getting-started/)
  * [our sorted example programs](https://github.com/KDAB/KDBindings/blob/main/examples)
 
 Contact
