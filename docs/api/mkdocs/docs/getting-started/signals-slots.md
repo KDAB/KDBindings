@@ -20,7 +20,7 @@ A Signal in KDBindings is just an object that can be freely used anywhere in you
 They are templated over the types of values they emit, which may be of any type.
 
 Slots can be connected to such a Signal by simply calling `connect(...)` on the Signal object.
-To emit the object, call `emit(...)` and pass the arguments the Signal emits.
+To emit the Signal, call `emit(...)` and pass the arguments the Signal emits.
 
 ### Minimal example
 ``` cpp
