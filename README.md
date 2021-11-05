@@ -1,6 +1,6 @@
 KDBindings
 ==========
-Bindings, from the comfort and speed of C++ and without Qt.
+Reactive programming & data binding in C++
 
 From plain C++ you get:
 
