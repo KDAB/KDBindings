@@ -1,4 +1,4 @@
-site_name: KDBindings - Reactive programming & data binding in C++
+site_name: KDBindings ${CMAKE_PROJECT_VERSION} - Reactive programming & data binding in C++
 site_url: https://docs.kdab.com/kdbindings/${CMAKE_PROJECT_VERSION}/
 repo_url: https://github.com/kdab/kdbindings
 site_description: KDBindings Documentation - Reactive programming & data binding in C++
