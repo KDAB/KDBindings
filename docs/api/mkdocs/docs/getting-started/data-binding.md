@@ -94,8 +94,8 @@ new binding to a Property with an existing binding is possible.
 
 For this, use the [makeBinding](../Namespaces/namespaceKDBindings.md#function-makebinding) function instead of [makeBoundProperty](../Namespaces/namespaceKDBindings.md#function-makeboundproperty) to create the binding.
 
-It is also possible to use makeBoundProperty, which will move-assign a new Property into the existing one.
-In this case, all existing connections to the old property will be disconnected, which might not be what you want!
+It is also possible to use makeBoundProperty, which will move-assign a new Property into the existing one, therefore completely replacing the existing Property with a new one.
+This means that all signals of the old property will be disconnected (see [signals & slots](signals-slots.md)) and any existing data bindings that depended on the property will be removed, which might not be what you want!
 
 Rule of thumb: If you want to create a new property, use makeBoundProperty, if you want to add a new binding to an
 existing Property, use makeBinding.
