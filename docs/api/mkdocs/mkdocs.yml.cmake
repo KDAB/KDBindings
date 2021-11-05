@@ -1,7 +1,7 @@
-site_name: KDBindings - Bindings from the comfort and speed of C++
+site_name: KDBindings - Reactive programming & data binding in C++
 site_url: https://docs.kdab.com/kdbindings/${CMAKE_PROJECT_VERSION}/
 repo_url: https://github.com/kdab/kdbindings
-site_description: KDBindings Documentation - Bindings from the comfort and speed of C++
+site_description: KDBindings Documentation - Reactive programming & data binding in C++
 site_author: Klarälvdalens Datakonsult AB (KDAB)
 
 theme:
