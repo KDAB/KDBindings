@@ -125,7 +125,7 @@ public:
      *
      * To temporarily block a connection, consider using an instance of ConnectionBlocker,
      * which offers a RAII-style implementation that makes sure the connection is always
-     * returned to it's original state.
+     * returned to its original state.
      *
      * @param blocked The new blocked state of the connection.
      * @return whether the connection was previously blocked.
@@ -436,7 +436,7 @@ public:
      *
      * To temporarily block a connection, consider using an instance of ConnectionBlocker,
      * which offers a RAII-style implementation that makes sure the connection is always
-     * returned to it's original state.
+     * returned to its original state.
      *
      * @param blocked Whether the connection should be blocked from now on.
      * @param handle The ConnectionHandle to block.

@@ -116,13 +116,13 @@ private:
 };
 
 /**
- * This subclass of BindingEvaluator doesn't do anything special on it's own.
+ * This subclass of BindingEvaluator doesn't do anything special on its own.
  * It is used together with a template specialization of Binding to provide
  * old-school, immediate mode Bindings.
  *
  * Any Binding that is constructed with an ImmediateBindingEvaluator will not wait
  * for the evaluator to call evaluateAll, but rather evaluate the Binding immediately
- * when any of it's bindables (i.e. Property instances) change.
+ * when any of its bindables (i.e. Property instances) change.
  * This can lead to a Property Binding being evaluated many
  * times before the result is ever used in a typical GUI application.
  */

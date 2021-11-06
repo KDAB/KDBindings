@@ -37,7 +37,7 @@ struct TypeMarker {
 };
 
 // base implementation of get_arity refers to specialized implementations for each
-// type of callable object by using the overload for it's specialized TypeMarker.
+// type of callable object by using the overload for its specialized TypeMarker.
 template<typename T>
 constexpr size_t get_arity()
 {
@@ -45,14 +45,14 @@ constexpr size_t get_arity()
 }
 
 // Syntactic sugar version of get_arity, allows to pass any callable object
-// to get_arity, instead of having to pass it's decltype as a template argument.
+// to get_arity, instead of having to pass its decltype as a template argument.
 template<typename T>
 constexpr size_t get_arity(const T &)
 {
     return get_arity<T>();
 }
 
-// The arity of a function pointer is simply it's number of arguments.
+// The arity of a function pointer is simply its number of arguments.
 template<typename Return, typename... Arguments>
 constexpr size_t get_arity(TypeMarker<Return (*)(Arguments...)>)
 {
@@ -65,7 +65,7 @@ constexpr size_t get_arity(TypeMarker<Return (*)(Arguments...) noexcept>)
     return sizeof...(Arguments);
 }
 
-// The arity of a generic callable object is the arity of it's operator() - 1, as the this
+// The arity of a generic callable object is the arity of its operator() - 1, as the this
 // pointer is already known for such an object.
 template<typename T>
 constexpr size_t get_arity(TypeMarker<T>)
