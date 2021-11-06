@@ -86,7 +86,7 @@ Property<int> result = makeBoundProperty(2 * value);
 result = 5; // this will throw a KDBindings::ReadOnlyProperty error!
 ```
 
-To intentionally remove a binding from a property, use it's [`reset`](../../Classes/classKDBindings_1_1Property/#function-reset) function.
+To intentionally remove a binding from a property, use its [`reset`](../../Classes/classKDBindings_1_1Property/#function-reset) function.
 
 ### Reassigning a Binding
 Even though KDBindings prevents you from accidentally overriding a binding with a concrete value, assigning a

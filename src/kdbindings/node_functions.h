@@ -44,7 +44,7 @@ struct any_bindables<HEAD, Ts...> : std::integral_constant<
  * The result function that can be called with a Property or the result of a data binding expression
  * to create another data binding expression.
  *
- * Note that if a function is overloaded, it is impossible to reference all of it's overloads at once.
+ * Note that if a function is overloaded, it is impossible to reference all of its overloads at once.
  * Therefore we recommend declaring a struct with a templated operator() to use as the function object.
  * See the KDBindings::node_abs struct for an example of how to do this.
  *
@@ -90,7 +90,7 @@ KDBINDINGS_DECLARE_FUNCTION(abs, node_abs{})
  *
  * The declared struct can be used as the FUNCTION argument to
  * KDBINDINGS_DECLARE_FUNCTION(NAME, FUNCTION) to pass a function with
- * all it's overloads to the macro.
+ * all its overloads to the macro.
  *
  * See the KDBindings::node_abs struct for an example of what this macro would generate.
  *

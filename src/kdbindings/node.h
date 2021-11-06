@@ -140,7 +140,7 @@ public:
 
 protected:
     // A constant can never be dirty, so it doesn't need to
-    // know it's parent, as it doesn't have to notify it.
+    // know its parent, as it doesn't have to notify it.
     Dirtyable **parentVariable() override { return nullptr; }
     const bool *dirtyVariable() const override { return nullptr; }
 

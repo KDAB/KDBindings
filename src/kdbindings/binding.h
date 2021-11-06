@@ -144,7 +144,7 @@ inline std::unique_ptr<Binding<T, EvaluatorT>> makeBinding(EvaluatorT &evaluator
 }
 
 /**
- * @brief Helper function to create a Binding from a function and it's arguments.
+ * @brief Helper function to create a Binding from a function and its arguments.
  *
  * @tparam EvaluatorT The type of the evaluator that is used to evaluate the Binding.
  * @param evaluator The evaluator that is used to evaluate the Binding.
@@ -245,7 +245,7 @@ inline std::unique_ptr<Binding<T, ImmediateBindingEvaluator>> makeBinding(Privat
 }
 
 /**
- * @brief Helper function to create an immediate mode Binding from a function and it's arguments.
+ * @brief Helper function to create an immediate mode Binding from a function and its arguments.
  *
  * @tparam Func The type of the function - may be any type that implements operator().
  * @param func The function object.
