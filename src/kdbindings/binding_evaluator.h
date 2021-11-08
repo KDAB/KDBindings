@@ -136,19 +136,24 @@ public:
     }
 };
 
+} // namespace KDBindings
+
 /**
  * @example 06-lazy-property-bindings/main.cpp
  *
- * An example of how to use KDBindings::BindingEvaluator together with a KDBindings::Property to create a Property binding that is only reevaluated on demand.
+ * An example of how to use KDBindings::BindingEvaluator together
+ * with a KDBindings::Property to create a Property binding that is
+ * only reevaluated on demand.
  *
  * The output of this example is:
- * @code
+ * ```
  * The initial size of the image = 1920000 bytes
  * The new size of the image = 8294400 bytes
- * @endcode
- * Note the difference to @ref 05-property-bindings/main.cpp, where the new size of the image is calculated twice.
+ * ```
  *
- * This feature is especially useful to reduce the performance impact of bindings and to create bindings that only update in specific intervals.
+ * Note the difference to @ref 05-property-bindings/main.cpp, where the
+ * new size of the image is calculated twice.
+ *
+ * This feature is especially useful to reduce the performance impact of
+ * bindings and to create bindings that only update in specific intervals.
  */
-
-} // namespace KDBindings
