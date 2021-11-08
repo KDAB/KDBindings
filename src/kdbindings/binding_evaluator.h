@@ -156,4 +156,6 @@ public:
  *
  * This feature is especially useful to reduce the performance impact of
  * bindings and to create bindings that only update in specific intervals.
+ *
+ *
  */
