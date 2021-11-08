@@ -97,7 +97,7 @@ if(${PROJECT_NAME}_DOCS)
 else()
   add_custom_target(docs
     COMMAND ${CMAKE_COMMAND} -E echo "Sorry, there is no docs target since KDBindings_DOCS=OFF."
-    "Re-run cmake with the -DKDBindings_DOCS=True option if you want to generate the documentation.")
+    "Re-run cmake with the -DKDBindings_DOCS=ON option if you want to generate the documentation.")
 endif()
 
 if(${PROJECT_NAME}_IS_ROOT_PROJECT)
