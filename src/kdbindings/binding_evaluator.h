@@ -156,6 +156,7 @@ public:
  *
  * This feature is especially useful to reduce the performance impact of
  * bindings and to create bindings that only update in specific intervals.
- *
- *
+ * <br/><!-- This <br/> is a workaround for a bug in doxybook2 that causes
+ * the rendering of the example code to break because it is missing a
+ * newline-->
  */
