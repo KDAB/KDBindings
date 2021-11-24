@@ -24,5 +24,9 @@ myProperty.valueChanged().connect([](const std::string& value) {
 
 myProperty = "Hello World!";
 ```
+Expected output:
+```
+Hello World!
+```
 
 For more information and examples see the [KDBindings::Property documentation](../Classes/classKDBindings_1_1Property.md).
