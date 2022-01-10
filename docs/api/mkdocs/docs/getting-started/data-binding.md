@@ -43,6 +43,7 @@ using namespace KDBindings;
 
 Property<int> value(-1);
 Property<int> positiveValue = makeBoundProperty(abs(value));
+// positiveValue is 1
 ```
 
 
@@ -67,6 +68,10 @@ Property<std::string> lowerCase = makeBoundProperty(
 text = "Hello World!";
 std::cout << lowerCase.get() << std::endl;
 ```
+Expected output:
+```
+hello world!
+```
 
 ## No more broken bindings
 A common mistake in data binding is accidentally breaking a binding by assigning a value to it.
@@ -80,8 +85,9 @@ Assigning a value to a property that is the result of a data binding will result
 
 using namespace KDBindings;
 
-Property<int> value;
+Property<int> value = 2;
 Property<int> result = makeBoundProperty(2 * value);
+// result is now 4
 
 result = 5; // this will throw a KDBindings::ReadOnlyProperty error!
 ```
@@ -106,11 +112,14 @@ existing Property, use makeBinding.
 
 using namespace KDBindings;
 
-Property<int> value;
-auto result = makeBoundProperty(value);
+Property<int> value = 2;
+auto result = makeBoundProperty(2 * value);
+// result is 4
 
-result = makeBinding(2 * value); // This does not throw any exceptions.
-result = makeBoundProperty(3 * value); // This works too, but will override all existing connections to result.
+result = makeBinding(3 * value); // This does not throw any exceptions.
+// result is now 6
+result = makeBoundProperty(4 * value); // This works too, but will override all existing connections to result.
+// result is now 8
 ```
 
 

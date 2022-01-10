@@ -35,6 +35,10 @@ mySignal.connect([](const std::string& value){
 
 mySignal.emit("Hello World!");
 ```
+Expected output:
+```
+Hello World!
+```
 
 For the full class reference, see: [KDBindings::Signal](../Classes/classKDBindings_1_1Signal.md).
 
@@ -63,6 +67,10 @@ MyWidget widget;
 
 clicked.connect(&MyWidget::onClicked, &widget);
 clicked.emit();
+```
+Expected output:
+```
+Hello World!
 ```
 
 Note that in KDBindings, the order of arguments is in reverse to the order required by Qt.

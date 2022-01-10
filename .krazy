@@ -19,6 +19,7 @@ SKIP /genindex_array.c|/genindex_array.h
 SKIP /tests/doctest/doctest.h
 #skip CMake files
 SKIP Doxyfile.cmake
+SKIP /mkdocs.yml.cmake
 SKIP /KDBindingsConfig.cmake.in
 #skip more files
 SKIP CMakePresets.json
