@@ -1,5 +1,5 @@
 site_name: KDBindings ${CMAKE_PROJECT_VERSION} - Reactive programming & data binding in C++
-site_url: https://docs.kdab.com/kdbindings/${CMAKE_PROJECT_VERSION}/
+site_url: https://docs.kdab.com/kdbindings/latest/
 repo_url: https://github.com/kdab/kdbindings
 site_description: KDBindings Documentation - Reactive programming & data binding in C++
 site_author: Klarälvdalens Datakonsult AB (KDAB)
@@ -18,7 +18,7 @@ theme:
     text: 'Open Sans'
   favicon: assets/assets_logo_tree.svg
   logo: assets/transparentWhiteKDAB.svg
-copyright: "Copyright &copy; 2020-2021 Klar&auml;lvdalens Datakonsult AB (KDAB)<br>The Qt, C++ and OpenGL Experts<br><a href='https://www.kdab.com'>https://www.kdab.com/</a>"
+copyright: "Copyright &copy; 2020-2022 Klar&auml;lvdalens Datakonsult AB (KDAB)<br>The Qt, C++ and OpenGL Experts<br><a href='https://www.kdab.com'>https://www.kdab.com/</a>"
 extra:
   # Disabling the generator notice is currently a
   # Insiders only feature.

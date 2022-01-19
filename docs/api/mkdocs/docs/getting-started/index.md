@@ -46,7 +46,7 @@ set(CMAKE_CXX_STANDARD 17)
 ### Including KDBindings
 Once the library is correctly added to your project, the different features of KDBindings are available for include under the `kdbindings` directory.
 
-All parts of KDBindings are then accessible in the [KDBindings namespace](../Namespaces/namespaceKDBindings.md).
+All parts of KDBindings are then accessible in the [KDBindings namespace](../namespaceKDBindings.md).
 ``` cpp
 // Example includes
 #include <kdbindings/signal.h>
