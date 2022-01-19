@@ -38,12 +38,6 @@ configure_file(
   ${CMAKE_CURRENT_SOURCE_DIR}/mkdocs/mkdocs.yml.cmake
   ${CMAKE_CURRENT_BINARY_DIR}/mkdocs/mkdocs.yml
 )
-configure_file(
-  ${CMAKE_CURRENT_SOURCE_DIR}/doxybook/config.json.cmake
-  ${CMAKE_CURRENT_BINARY_DIR}/doxybook/config.json
-)
-
-option(KDBindings_DOCS_BUILD_HTML "Whether to compile the documentation files to HTML" OFF)
 
 add_custom_target(docs
   # Execute Doxygen
@@ -54,7 +48,7 @@ add_custom_target(docs
   COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_SOURCE_DIR}/LICENSES/MIT.txt ${DOXYGEN_OUTPUT_DIR}/mkdocs/docs/license.md
 
   # Run Doxybook2 to generate mkdocs compatible documentation
-  COMMAND ${DOXYBOOK2_EXECUTABLE} --config "${CMAKE_CURRENT_BINARY_DIR}/doxybook/config.json" --input "${DOXYGEN_OUTPUT_DIR}/xml" --output "${DOXYGEN_OUTPUT_DIR}/mkdocs/docs"
+  COMMAND ${DOXYBOOK2_EXECUTABLE} --config "${CMAKE_CURRENT_SOURCE_DIR}/doxybook/config.json" --input "${DOXYGEN_OUTPUT_DIR}/xml" --output "${DOXYGEN_OUTPUT_DIR}/mkdocs/docs"
 
   # Run MkDocs to build html documentation
   COMMAND ${MKDOCS_EXECUTABLE} build --config-file "${DOXYGEN_OUTPUT_DIR}/mkdocs/mkdocs.yml" --site-dir "${DOXYGEN_OUTPUT_DIR}/html"

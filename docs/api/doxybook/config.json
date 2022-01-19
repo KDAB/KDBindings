@@ -1,7 +1,8 @@
 {
-  "baseUrl": "/kdbindings/${CMAKE_PROJECT_VERSION}/",
+  "baseUrl": "",
+  "useFolders": false,
   "indexInFolders": false,
-  "linkSuffix": "/",
+  "linkSuffix": ".md",
   "mainPageInRoot": true,
   "mainPageName": "index",
   "filesFilter": [".h", ".hpp", ".cpp"],
