@@ -22,8 +22,11 @@ static_assert(std::is_nothrow_destructible<Property<int>>{});
 static_assert(std::is_default_constructible<Property<int>>{});
 static_assert(!std::is_copy_constructible<Property<int>>{});
 static_assert(!std::is_copy_assignable<Property<int>>{});
-static_assert(std::is_nothrow_move_constructible<Property<int>>{});
-static_assert(std::is_nothrow_move_assignable<Property<int>>{});
+// A property cannot be nothrow_move_assignable/constructible, as it emits
+// a moved Signal when moved. Any slot that is connected to this Signal may throw.
+static_assert(!std::is_nothrow_move_constructible<Property<int>>{});
+static_assert(!std::is_nothrow_move_assignable<Property<int>>{});
+
 
 struct CustomType {
     CustomType(int _a, uint64_t _b)

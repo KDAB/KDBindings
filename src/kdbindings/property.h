@@ -168,7 +168,7 @@ public:
      * All data bindings that depend on this Property will update their references
      * to the newly move-constructed Property using this Signal.
      */
-    Property(Property<T> &&other) noexcept(std::is_nothrow_move_constructible<T>::value)
+    Property(Property<T> &&other)
         : m_value(std::move(other.m_value))
         , m_valueAboutToChange(std::move(other.m_valueAboutToChange))
         , m_valueChanged(std::move(other.m_valueChanged))
@@ -194,7 +194,7 @@ public:
     /**
      * See: Property(Property<T> &&other)
      */
-    Property &operator=(Property<T> &&other) noexcept(std::is_nothrow_move_assignable<T>::value)
+    Property &operator=(Property<T> &&other)
     {
         // We do not move the m_moved signal so that objects interested in the moved-into
         // property can recreate any connections they need.
