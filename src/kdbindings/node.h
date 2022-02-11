@@ -210,7 +210,7 @@ private:
     {
         m_property = &property;
         m_valueChangedHandle = m_property->valueChanged().connect(&PropertyNode<PropertyType>::markDirty, this);
-        m_movedHandle = m_property->moved().connect(&PropertyNode<PropertyType>::propertyMoved, this);
+        m_movedHandle = m_property->m_moved.connect(&PropertyNode<PropertyType>::propertyMoved, this);
         m_destroyedHandle = m_property->destroyed().connect(&PropertyNode<PropertyType>::propertyDestroyed, this);
     }
 

@@ -295,39 +295,4 @@ TEST_CASE("Moving")
         REQUIRE(countValue == 1);
         REQUIRE(*(movedProperty.get()) == 123);
     }
-
-    SUBCASE("a property notifies when it has been moved into so we can recreate connections")
-    {
-        int countVoid = 0;
-        auto handlerVoid = [&countVoid]() { ++countVoid; };
-        Property<int> property{ 42 };
-
-        // Create a lambda we can use to create the initial connection and restore it
-        // when the property gets moved into (e.g. most likely when we assign a binding)
-        int countMoved = 0;
-        auto makeConnection = [&handlerVoid, &countMoved](const Property<int> &p) {
-            ++countMoved;
-            p.valueChanged().connect(handlerVoid);
-        };
-
-        // Create the initial connection
-        makeConnection(property);
-        REQUIRE(countMoved == 1);
-
-        // Ensure we get told about any moves
-        property.moved().connect(makeConnection);
-
-        // Change the property
-        property = 64;
-        REQUIRE(countVoid == 1);
-
-        // Move a new property into our original property
-        Property<int> property2{ 5 };
-        property = std::move(property2);
-        REQUIRE(countMoved == 2);
-
-        // Change the property again and our original lamba should get called still
-        property = 128;
-        REQUIRE(countVoid == 2);
-    }
 }
