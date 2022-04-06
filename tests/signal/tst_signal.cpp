@@ -479,4 +479,18 @@ TEST_CASE("ConnectionHandle")
         REQUIRE_FALSE(handle.belongsTo(signal));
         REQUIRE(handle.belongsTo(otherSignal));
     }
+
+    SUBCASE("scoped connection handle")
+    {
+        bool called = false;
+        Signal<> signal;
+        {
+            ScopedConnectionHandle handle = signal.connect([&called]() { called = !called; });
+            REQUIRE(handle.handle().isActive());
+            signal.emit();
+            REQUIRE(called);
+        }
+        signal.emit();
+        REQUIRE(called);
+    }
 }

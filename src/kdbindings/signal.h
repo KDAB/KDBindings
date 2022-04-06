@@ -192,6 +192,64 @@ private:
 };
 
 /**
+ * @brief A ScopedConnectionHandle is a connection handle that will
+ * automatically disconnect when its scope ends
+ **/
+class ScopedConnectionHandle
+{
+public:
+    ScopedConnectionHandle() = default;
+
+    ScopedConnectionHandle(ConnectionHandle &&h)
+        : m_connection(std::move(h))
+    {
+    }
+
+    ScopedConnectionHandle& operator=(ConnectionHandle &&h)
+    {
+        m_connection = std::move(h);
+        return *this;
+    }
+
+    /**
+     * @return the real handle that this class is managing
+     */
+    ConnectionHandle& handle()
+    {
+        return m_connection;
+    }
+
+    /**
+     * @overload
+     */
+    const ConnectionHandle& handle() const
+    {
+        return m_connection;
+    }
+
+    /**
+     * @brief Disconnect the slot
+     * @see ConnectionHandle::disconnect
+     */
+    void disconnect()
+    {
+        m_connection.disconnect();
+    }
+
+    ~ScopedConnectionHandle()
+    {
+        m_connection.disconnect();
+    }
+
+    // Cannot copy
+    ScopedConnectionHandle(const ScopedConnectionHandle &) = delete;
+    ScopedConnectionHandle& operator=(const ScopedConnectionHandle &) = delete;
+
+private:
+    ConnectionHandle m_connection;
+};
+
+/**
  * @brief A Signal provides a mechanism for communication between objects.
  *
  * KDBindings::Signal recreates the <a href="https://doc.qt.io/qt-5/signalsandslots.html">Qt's Signals & Slots mechanism</a> in pure C++17.
