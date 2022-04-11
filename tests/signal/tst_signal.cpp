@@ -27,6 +27,20 @@ static_assert(!std::is_copy_assignable<Signal<int>>{});
 static_assert(std::is_nothrow_move_constructible<Signal<int>>{});
 static_assert(std::is_nothrow_move_assignable<Signal<int>>{});
 
+static_assert(std::is_nothrow_destructible<ConnectionHandle>{});
+static_assert(std::is_nothrow_default_constructible<ConnectionHandle>{});
+static_assert(std::is_copy_constructible<ConnectionHandle>{});
+static_assert(std::is_copy_assignable<ConnectionHandle>{});
+static_assert(std::is_nothrow_move_constructible<ConnectionHandle>{});
+static_assert(std::is_nothrow_move_assignable<ConnectionHandle>{});
+
+static_assert(std::is_nothrow_destructible<ScopedConnection>{});
+static_assert(std::is_nothrow_default_constructible<ScopedConnection>{});
+static_assert(!std::is_copy_constructible<ScopedConnection>{});
+static_assert(!std::is_copy_assignable<ScopedConnection>{});
+static_assert(std::is_nothrow_move_constructible<ScopedConnection>{});
+static_assert(std::is_nothrow_move_assignable<ScopedConnection>{});
+
 class Button
 {
 public:
@@ -479,17 +493,45 @@ TEST_CASE("ConnectionHandle")
         REQUIRE_FALSE(handle.belongsTo(signal));
         REQUIRE(handle.belongsTo(otherSignal));
     }
+}
 
-    SUBCASE("scoped connection handle")
+TEST_CASE("ScopedConnection")
+{
+    SUBCASE("A default constructed ScopedConnection is inactive")
+    {
+        ScopedConnection guard;
+
+        REQUIRE_FALSE(guard->isActive());
+    }
+
+    SUBCASE("A ScopedConnection disconnects when it goes out of scope")
     {
         bool called = false;
         Signal<> signal;
         {
-            ScopedConnectionHandle handle = signal.connect([&called]() { called = !called; });
-            REQUIRE(handle.handle().isActive());
+            const ScopedConnection guard = signal.connect([&called]() { called = !called; });
+            REQUIRE(guard->isActive());
             signal.emit();
             REQUIRE(called);
         }
+        signal.emit();
+        REQUIRE(called);
+    }
+
+    SUBCASE("A ScopedConnection can be moved")
+    {
+        bool called = false;
+        Signal<> signal;
+        ScopedConnection into;
+        REQUIRE_FALSE(into->isActive());
+        {
+            ScopedConnection guard = signal.connect([&called]() { called = true; });
+            REQUIRE(guard->isActive());
+            into = std::move(guard);
+            REQUIRE_FALSE(guard->isActive());
+        }
+        REQUIRE(into->isActive());
+
         signal.emit();
         REQUIRE(called);
     }
