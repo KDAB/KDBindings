@@ -31,7 +31,7 @@ cmake_minimum_required(VERSION 3.12) # for `project(... HOMEPAGE_URL ...)`
 project(KDBindings
   DESCRIPTION "Bindings, from the comfort and speed of C++ and without Qt"
   LANGUAGES CXX
-  VERSION 1.0.1
+  VERSION 1.0.95
   HOMEPAGE_URL "https://github.com/KDAB/KDBindings"
 )
 
