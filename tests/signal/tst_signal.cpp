@@ -518,6 +518,19 @@ TEST_CASE("ScopedConnection")
         REQUIRE(called);
     }
 
+    SUBCASE("A ScopedConnection disconnects when assigned")
+    {
+        int numCalled = 0;
+        Signal<> signal;
+        ScopedConnection guard = signal.connect([&numCalled]() { numCalled++; });
+        signal.emit();
+        CHECK_EQ(numCalled, 1);
+
+        guard = signal.connect([&numCalled]() { numCalled++; });
+        signal.emit();
+        CHECK_EQ(numCalled, 2);
+    }
+
     SUBCASE("A ScopedConnection can be moved")
     {
         bool called = false;
