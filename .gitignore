@@ -79,6 +79,7 @@ imgui.ini
 
 .vscode/*
 build/*
+build-*
 serenity_metatype.*
 output.json
 
