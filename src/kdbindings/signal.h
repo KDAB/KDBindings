@@ -563,6 +563,7 @@ public:
      */
     ScopedConnection &operator=(ConnectionHandle &&h)
     {
+        m_connection.disconnect();
         m_connection = std::move(h);
         return *this;
     }
