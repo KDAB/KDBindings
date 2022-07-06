@@ -39,7 +39,7 @@ static_assert(std::is_nothrow_default_constructible<ScopedConnection>{});
 static_assert(!std::is_copy_constructible<ScopedConnection>{});
 static_assert(!std::is_copy_assignable<ScopedConnection>{});
 static_assert(std::is_nothrow_move_constructible<ScopedConnection>{});
-static_assert(std::is_nothrow_move_assignable<ScopedConnection>{});
+static_assert(!std::is_nothrow_move_assignable<ScopedConnection>{});
 
 class Button
 {
@@ -518,7 +518,7 @@ TEST_CASE("ScopedConnection")
         REQUIRE(called);
     }
 
-    SUBCASE("A ScopedConnection disconnects when assigned")
+    SUBCASE("A ScopedConnection disconnects when assigned a new ConnectionHandle")
     {
         int numCalled = 0;
         Signal<> signal;
@@ -529,6 +529,27 @@ TEST_CASE("ScopedConnection")
         guard = signal.connect([&numCalled]() { numCalled++; });
         signal.emit();
         CHECK_EQ(numCalled, 2);
+    }
+
+    SUBCASE("A ScopedConnection disconnects when move assigned")
+    {
+        int numCalled = 0;
+        Signal<> signal;
+        {
+            ScopedConnection guard1 = signal.connect([&numCalled]() { numCalled++; });
+            ScopedConnection guard2 = signal.connect([&numCalled]() { numCalled++; });
+
+            // This should drop the old connection of guard1
+            guard1 = std::move(guard2);
+            CHECK(!guard2->isActive());
+            CHECK(guard1->isActive());
+
+            signal.emit();
+            CHECK_EQ(numCalled, 1);
+        }
+        // all connections should now be dropped
+        signal.emit();
+        CHECK_EQ(numCalled, 1);
     }
 
     SUBCASE("A ScopedConnection can be moved")
