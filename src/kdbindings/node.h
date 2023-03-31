@@ -100,8 +100,8 @@ template<typename ResultType>
 class Node
 {
 public:
-    Node(std::unique_ptr<NodeInterface<ResultType>> &&interface)
-        : m_interface(std::move(interface))
+    Node(std::unique_ptr<NodeInterface<ResultType>> &&nodeInterface)
+        : m_interface(std::move(nodeInterface))
     {
     }
 
