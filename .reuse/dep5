@@ -4,12 +4,12 @@ Upstream-Contact:  <info@kdab.com>
 Source: https://www.github.com/KDAB/KDBindings
 
 Files: *.json *.html *.md docs/api/Doxyfile.cmake docs/api/mkdocs/mkdocs.yml docs/api/mkdocs/docs/stylesheets/kdab.css
-Copyright: 2020-2022 Klarälvdalens Datakonsult AB, a KDAB Group company <info@kdab.com>
+Copyright: 2020-2023 Klarälvdalens Datakonsult AB, a KDAB Group company <info@kdab.com>
 License: MIT
 
 #artwork
 Files: docs/api/*.png docs/api/mkdocs/docs/assets/*.svg
-Copyright: 2001-2022 Klarälvdalens Datakonsult AB, a KDAB Group company <info@kdab.com>
+Copyright: 2001-2023 Klarälvdalens Datakonsult AB, a KDAB Group company <info@kdab.com>
 License: MIT
 
 #3rdparty cmake
