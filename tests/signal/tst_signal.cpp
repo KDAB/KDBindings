@@ -11,9 +11,11 @@
 
 #include "kdbindings/utils.h"
 #include <kdbindings/signal.h>
+#include <kdbindings/connection_evaluator.h>
 
 #include <stdexcept>
 #include <string>
+#include <thread>
 
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include <doctest.h>
@@ -75,6 +77,57 @@ TEST_CASE("Signal connections")
 
         signal.emit("The answer:", 42);
         REQUIRE(lambdaCalled == true);
+    }
+
+    SUBCASE("Deferred Connections")
+    {
+        ConnectionEvaluator evaluator;
+        Signal<int> signal1;
+        Signal<std::string> signal2;
+        Signal<int, std::string> signal3;
+        int val = 4;
+
+        std::thread thread1([&] {
+            signal1.connectDeferred(evaluator, [&val](int value) {
+                val--;
+            });
+        });
+
+        std::thread thread2([&] {
+            signal2.connectDeferred(evaluator, [&val](std::string) {
+                val++;
+            });
+        });
+
+        // Wait for threads to finish connecting
+        thread1.join();
+        thread2.join();
+
+        const auto result = signal3.connectDeferred(evaluator, [&val](int, std::string) {
+            val++;
+        });
+
+        REQUIRE(result.isActive());
+
+        signal3.disconnect(result);
+
+        // Emit signals(reentrant) in different threads
+        std::thread thread3([&] {
+            signal1.emit(42);
+        });
+
+        std::thread thread4([&] {
+            signal2.emit("Hi");
+        });
+
+        thread3.join();
+        thread4.join();
+
+        REQUIRE(!result.isActive());
+        signal3.emit(1, "Hi"); // it does not affect, as the signal3 already disconnected
+
+        evaluator.evaluateDeferredConnections();
+        REQUIRE(val == 4);
     }
 
     SUBCASE("A signal with arguments can be connected to a lambda and invoked with l-value args")

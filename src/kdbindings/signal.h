@@ -18,7 +18,9 @@
 #include <stdexcept>
 #include <type_traits>
 #include <utility>
+#include <mutex>
 
+#include <kdbindings/connection_evaluator.h>
 #include <kdbindings/genindex_array.h>
 #include <kdbindings/utils.h>
 
@@ -242,6 +244,22 @@ class Signal
             return m_connections.insert({ slot });
         }
 
+        // Establish a deferred connection between signal and slot, where ConnectionEvaluator object
+        // used to queue all the connection to evaluate later. The returned
+        // value can be used to disconnect the function again.
+        Private::GenerationalIndex connectDeferred(ConnectionEvaluator &evaluator, std::function<void(Args...)> const &slot)
+        {
+            std::lock_guard<std::mutex> lock(connectionMutex);
+            auto connection = [&evaluator, slot](Args... args) {
+                auto lambda = [slot, args...]() {
+                    slot(args...);
+                };
+
+                evaluator.addConnection(lambda);
+            };
+            return m_connections.insert({ connection, true });
+        }
+
         // Disconnects a previously connected function
         void disconnect(const Private::GenerationalIndex &id) override
         {
@@ -284,6 +302,8 @@ class Signal
         // Calls all connected functions
         void emit(Args... p) const
         {
+            std::lock_guard<std::mutex> lock(connectionMutex);
+
             const auto numEntries = m_connections.entriesSize();
 
             // This loop can tolerate signal handles being disconnected inside a slot,
@@ -294,8 +314,9 @@ class Signal
                 if (index) {
                     const auto con = m_connections.get(*index);
 
-                    if (!con->blocked)
+                    if (!con->blocked) {
                         con->slot(p...);
+                    }
                 }
             }
         }
@@ -303,9 +324,11 @@ class Signal
     private:
         struct Connection {
             std::function<void(Args...)> slot;
+            bool isDeferred{ false };
             bool blocked{ false };
         };
         mutable Private::GenerationalIndexArray<Connection> m_connections;
+        mutable std::mutex connectionMutex;
     };
 
 public:
@@ -347,6 +370,25 @@ public:
         ensureImpl();
 
         return ConnectionHandle{ m_impl, m_impl->connect(slot) };
+    }
+
+    /**
+     * @brief Establishes a deferred connection between the provided evaluator and slot.
+     *
+     * This function allows connecting an evaluator and a slot such that the slot's execution
+     * is deferred until the conditions evaluated by the `evaluator` are met.
+     *
+     * First argument to the function is reference to the `ConnectionEvaluator` responsible for determining
+     * when the slot should be executed.
+     * 
+     * @return An instance of ConnectionHandle, that can be used to disconnect
+     * or temporarily block the connection.
+     */
+    ConnectionHandle connectDeferred(ConnectionEvaluator &evaluator, std::function<void(Args...)> const &slot)
+    {
+        ensureImpl();
+
+        return ConnectionHandle(m_impl, m_impl->connectDeferred(evaluator, slot));
     }
 
     /**
