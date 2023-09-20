@@ -42,15 +42,15 @@ public:
      */
     void evaluateDeferredConnections()
     {
-        std::list<std::function<void()>> copiedConnections;
+        std::list<std::function<void()>> movedConnections;
         {
             std::lock_guard<std::mutex> lock(connectionsMutex);
-            copiedConnections = std::move(connections);
+            movedConnections = std::move(connections);
             // Reinitialize the connections list
             connections = std::list<std::function<void()>>();
         }
 
-        for (auto &connection : copiedConnections) {
+        for (auto &connection : movedConnections) {
             connection();
         }
     }
