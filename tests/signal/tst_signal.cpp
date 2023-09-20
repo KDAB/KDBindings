@@ -79,55 +79,126 @@ TEST_CASE("Signal connections")
         REQUIRE(lambdaCalled == true);
     }
 
-    SUBCASE("Deferred Connections")
+    SUBCASE("Disconnect Deferred Connection")
     {
-        ConnectionEvaluator evaluator;
-        Signal<int> signal1;
-        Signal<std::string> signal2;
-        Signal<int, std::string> signal3;
+        Signal<int> signal;
         int val = 4;
+        auto evaluator = std::make_shared<ConnectionEvaluator>();
+
+        auto connection = signal.connectDeferred(evaluator, [&val](int value) {
+            val += value;
+        });
+
+        REQUIRE(connection.isActive());
+
+        signal.emit(4);
+
+        connection.disconnect();
+        REQUIRE(!connection.isActive());
+
+        signal.emit(6); // It will not affect the result as the signal is disconnected
+
+        evaluator->evaluateDeferredConnections();
+        REQUIRE(val == 8);
+    }
+
+    SUBCASE("Multiple Signals with Evaluator")
+    {
+        Signal<int> signal1;
+        Signal<int> signal2;
+        int val = 4;
+        auto evaluator = std::make_shared<ConnectionEvaluator>();
 
         std::thread thread1([&] {
             signal1.connectDeferred(evaluator, [&val](int value) {
-                val--;
+                val += value;
             });
         });
 
         std::thread thread2([&] {
-            signal2.connectDeferred(evaluator, [&val](std::string) {
-                val++;
+            signal2.connectDeferred(evaluator, [&val](int value) {
+                val += value;
             });
         });
 
-        // Wait for threads to finish connecting
         thread1.join();
         thread2.join();
 
-        const auto result = signal3.connectDeferred(evaluator, [&val](int, std::string) {
-            val++;
+        signal1.emit(2);
+        signal2.emit(3);
+
+        evaluator->evaluateDeferredConnections();
+
+        REQUIRE(val == 9);
+    }
+
+    SUBCASE("Emit Multiple Signals with Evaluator")
+    {
+        Signal<int> signal1;
+        Signal<int> signal2;
+        int val1 = 4;
+        int val2 = 4;
+        auto evaluator = std::make_shared<ConnectionEvaluator>();
+
+        signal1.connectDeferred(evaluator, [&val1](int value) {
+            val1 += value;
         });
 
-        REQUIRE(result.isActive());
-
-        signal3.disconnect(result);
-
-        // Emit signals(reentrant) in different threads
-        std::thread thread3([&] {
-            signal1.emit(42);
+        signal2.connectDeferred(evaluator, [&val2](int value) {
+            val2 += value;
         });
 
-        std::thread thread4([&] {
-            signal2.emit("Hi");
+        std::thread thread1([&] {
+            signal1.emit(2);
         });
 
-        thread3.join();
-        thread4.join();
+        std::thread thread2([&] {
+            signal2.emit(3);
+        });
 
-        REQUIRE(!result.isActive());
-        signal3.emit(1, "Hi"); // it does not affect, as the signal3 already disconnected
+        thread1.join();
+        thread2.join();
 
-        evaluator.evaluateDeferredConnections();
-        REQUIRE(val == 4);
+        evaluator->evaluateDeferredConnections();
+
+        REQUIRE(val1 == 6);
+        REQUIRE(val2 == 7);
+    }
+
+    SUBCASE("Deferred Connect, Emit, Delete, and Evaluate")
+    {
+        Signal<int> signal;
+        int val = 4;
+        auto evaluator = std::make_shared<ConnectionEvaluator>();
+
+        auto connection = signal.connectDeferred(evaluator, [&val](int value) {
+            val += value;
+        });
+
+        REQUIRE(connection.isActive());
+
+        signal.emit(2);
+        connection.disconnect();
+        evaluator->evaluateDeferredConnections();
+
+        REQUIRE(val == 6);
+    }
+
+    SUBCASE("Double Evaluate Deferred Connections")
+    {
+        Signal<int> signal;
+        int val = 4;
+        auto evaluator = std::make_shared<ConnectionEvaluator>();
+
+        signal.connectDeferred(evaluator, [&val](int value) {
+            val += value;
+        });
+
+        signal.emit(2);
+        evaluator->evaluateDeferredConnections();
+        evaluator->evaluateDeferredConnections();
+
+        REQUIRE(val == 6);
     }
 
     SUBCASE("A signal with arguments can be connected to a lambda and invoked with l-value args")

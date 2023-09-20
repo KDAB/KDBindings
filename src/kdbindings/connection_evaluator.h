@@ -7,12 +7,13 @@
 namespace KDBindings {
 
 /**
- * @brief Manages and evaluates conditions for deferred connections.
+ * @brief Manages and evaluates deferred Signal connections.
  *
- * The ConnectionEvaluator class is responsible for managing and evaluating conditions
- * that determine when deferred connections should be executed. It provides mechanisms
- * to evaluate connections based on specific criteria. This class is
- * used in conjunction with the Signal class to establish and control connections.
+ * The ConnectionEvaluator class is responsible for managing and evaluating connections
+ * to Signals. It provides mechanisms to delay and control the evaluation of connections.
+ * It therefore allows controlling when and on which thread slots connected to a Signal are executed.
+ *
+ * @see Signal::connectDeferred()
  */
 class ConnectionEvaluator
 {
@@ -20,10 +21,15 @@ class ConnectionEvaluator
 public:
     ConnectionEvaluator() = default;
 
-    ConnectionEvaluator(const ConnectionEvaluator &) noexcept = default;
+    // ConnectionEvaluators are not copyable, as it is designed to manage connections,
+    // and copying it could lead to unexpected behavior, including duplication of connections and issues
+    // related to connection lifetimes. Therefore, it is intentionally made non-copyable.
+    ConnectionEvaluator(const ConnectionEvaluator &) noexcept = delete;
 
-    ConnectionEvaluator &operator=(const ConnectionEvaluator &) noexcept = default;
+    ConnectionEvaluator &operator=(const ConnectionEvaluator &) noexcept = delete;
 
+    // ConnectionEvaluators are not moveable, as they are captures by-reference
+    // by the Signal, so moving them would lead to a dangling reference.
     ConnectionEvaluator(ConnectionEvaluator &&other) noexcept = delete;
 
     ConnectionEvaluator &operator=(ConnectionEvaluator &&other) noexcept = delete;
@@ -32,17 +38,16 @@ public:
      * @brief Evaluate and execute deferred connections.
      *
      * This function is responsible for evaluating and executing deferred connections.
-     * It locks the `connectionsMutex` to ensure thread safety while accessing the list
-     * of deferred connections. It then copies the list of connections to avoid
-     * interference with reentrant emissions. Finally, it iterates through the copied
-     * connections and executes each one by calling the associated function object.
+     * And this function ensures thread safety
      */
     void evaluateDeferredConnections()
     {
         std::list<std::function<void()>> copiedConnections;
         {
             std::lock_guard<std::mutex> lock(connectionsMutex);
-            copiedConnections = connections;
+            copiedConnections = std::move(connections);
+            // Reinitialize the connections list
+            connections = std::list<std::function<void()>>();
         }
 
         for (auto &connection : copiedConnections) {

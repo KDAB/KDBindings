@@ -247,15 +247,20 @@ class Signal
         // Establish a deferred connection between signal and slot, where ConnectionEvaluator object
         // used to queue all the connection to evaluate later. The returned
         // value can be used to disconnect the function again.
-        Private::GenerationalIndex connectDeferred(ConnectionEvaluator &evaluator, std::function<void(Args...)> const &slot)
+        Private::GenerationalIndex connectDeferred(const std::shared_ptr<ConnectionEvaluator> &evaluator, std::function<void(Args...)> const &slot)
         {
-            std::lock_guard<std::mutex> lock(connectionMutex);
-            auto connection = [&evaluator, slot](Args... args) {
-                auto lambda = [slot, args...]() {
-                    slot(args...);
-                };
+            auto weakEvaluator = std::weak_ptr<ConnectionEvaluator>(evaluator);
 
-                evaluator.addConnection(lambda);
+            auto connection = [weakEvaluator, slot](Args... args) {
+                // Check if the ConnectionEvaluator is still alive
+                if (auto evaluatorPtr = weakEvaluator.lock()) {
+                    auto lambda = [slot, args...]() {
+                        slot(args...);
+                    };
+                    evaluatorPtr->addConnection(lambda);
+                } else {
+                    throw std::runtime_error("ConnectionEvaluator is no longer alive");
+                }
             };
             return m_connections.insert({ connection, true });
         }
@@ -302,7 +307,6 @@ class Signal
         // Calls all connected functions
         void emit(Args... p) const
         {
-            std::lock_guard<std::mutex> lock(connectionMutex);
 
             const auto numEntries = m_connections.entriesSize();
 
@@ -328,7 +332,6 @@ class Signal
             bool blocked{ false };
         };
         mutable Private::GenerationalIndexArray<Connection> m_connections;
-        mutable std::mutex connectionMutex;
     };
 
 public:
@@ -378,13 +381,13 @@ public:
      * This function allows connecting an evaluator and a slot such that the slot's execution
      * is deferred until the conditions evaluated by the `evaluator` are met.
      *
-     * First argument to the function is reference to the `ConnectionEvaluator` responsible for determining
+     * First argument to the function is reference to a shared pointer to the `ConnectionEvaluator` responsible for determining
      * when the slot should be executed.
      * 
      * @return An instance of ConnectionHandle, that can be used to disconnect
      * or temporarily block the connection.
      */
-    ConnectionHandle connectDeferred(ConnectionEvaluator &evaluator, std::function<void(Args...)> const &slot)
+    ConnectionHandle connectDeferred(const std::shared_ptr<ConnectionEvaluator> &evaluator, std::function<void(Args...)> const &slot)
     {
         ensureImpl();
 
