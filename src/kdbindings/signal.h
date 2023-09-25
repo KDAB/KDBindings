@@ -206,6 +206,14 @@ private:
  *
  * The Args type parameter pack describe which value types the Signal will emit.
  *
+ * Deferred Connection:
+ *
+ * KDBindings::Signal supports deferred connections, enabling the decoupling of signal
+ * emission from the execution of connected slots. With deferred connections, you can
+ * connect slots to the Signal that are not immediately executed when the signal is emitted.
+ * Instead, you can evaluate these deferred connections at a later time, allowing for
+ * asynchronous or delayed execution of connected slots.
+ * 
  * Examples:
  * - @ref 01-simple-connection/main.cpp
  * - @ref 02-signal-member/main.cpp
@@ -251,7 +259,7 @@ class Signal
         {
             auto weakEvaluator = std::weak_ptr<ConnectionEvaluator>(evaluator);
 
-            auto connection = [weakEvaluator, slot](Args... args) {
+            auto connection = [weakEvaluator = std::move(weakEvaluator), slot](Args... args) {
                 // Check if the ConnectionEvaluator is still alive
                 if (auto evaluatorPtr = weakEvaluator.lock()) {
                     auto lambda = [slot, args...]() {
@@ -386,6 +394,10 @@ public:
      * 
      * @return An instance of ConnectionHandle, that can be used to disconnect
      * or temporarily block the connection.
+     * 
+     * @note
+     * The `KDBindings::Signal` class itself is not thread-safe. While the `ConnectionEvaluator` is inherently
+     * thread-safe, ensure that any concurrent access to this Signal is protected externally to maintain thread safety.
      */
     ConnectionHandle connectDeferred(const std::shared_ptr<ConnectionEvaluator> &evaluator, std::function<void(Args...)> const &slot)
     {

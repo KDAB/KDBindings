@@ -92,11 +92,13 @@ TEST_CASE("Signal connections")
         REQUIRE(connection.isActive());
 
         signal.emit(4);
+        REQUIRE(val == 4); // val not changing immediately after emit 
 
         connection.disconnect();
         REQUIRE(!connection.isActive());
 
         signal.emit(6); // It will not affect the result as the signal is disconnected
+        REQUIRE(val == 4);
 
         evaluator->evaluateDeferredConnections();
         REQUIRE(val == 8);
@@ -126,6 +128,7 @@ TEST_CASE("Signal connections")
 
         signal1.emit(2);
         signal2.emit(3);
+        REQUIRE(val == 4); // val not changing immediately after emit 
 
         evaluator->evaluateDeferredConnections();
 
@@ -158,6 +161,9 @@ TEST_CASE("Signal connections")
 
         thread1.join();
         thread2.join();
+        
+        REQUIRE(val1 == 4);
+        REQUIRE(val2 == 4);
 
         evaluator->evaluateDeferredConnections();
 
@@ -178,6 +184,8 @@ TEST_CASE("Signal connections")
         REQUIRE(connection.isActive());
 
         signal.emit(2);
+        REQUIRE(val == 4);
+
         connection.disconnect();
         evaluator->evaluateDeferredConnections();
 
@@ -195,6 +203,8 @@ TEST_CASE("Signal connections")
         });
 
         signal.emit(2);
+        REQUIRE(val == 4);
+
         evaluator->evaluateDeferredConnections();
         evaluator->evaluateDeferredConnections();
 
