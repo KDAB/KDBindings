@@ -4,6 +4,8 @@
 #include <list>
 #include <mutex>
 
+#include <kdbindings/connection_handle.h>
+
 namespace KDBindings {
 
 /**
@@ -21,7 +23,7 @@ class ConnectionEvaluator
 public:
     ConnectionEvaluator() = default;
 
-    // ConnectionEvaluators are not copyable, as it is designed to manage connections,
+    // ConnectionEvaluator is not copyable, as it is designed to manage connections,
     // and copying it could lead to unexpected behavior, including duplication of connections and issues
     // related to connection lifetimes. Therefore, it is intentionally made non-copyable.
     ConnectionEvaluator(const ConnectionEvaluator &) noexcept = delete;
@@ -35,23 +37,25 @@ public:
     ConnectionEvaluator &operator=(ConnectionEvaluator &&other) noexcept = delete;
 
     /**
-     * @brief Evaluate and execute deferred connections.
+     * @brief Evaluate the deferred connections.
      *
      * This function is responsible for evaluating and executing deferred connections.
      * And this function ensures thread safety
      */
     void evaluateDeferredConnections()
     {
-        std::list<std::function<void()>> movedConnections;
+        std::vector<std::pair<const ConnectionHandle *, std::function<void()>>> movedConnections;
+
         {
             std::lock_guard<std::mutex> lock(connectionsMutex);
-            movedConnections = std::move(connections);
-            // Reinitialize the connections list
-            connections = std::list<std::function<void()>>();
+
+            // Move out the current connections and replace the original vector with an empty one.
+            movedConnections = std::move(m_deferredConnections);
+            m_deferredConnections.clear(); // This is actually redundant after a move, but makes the intent clear.
         }
 
-        for (auto &connection : movedConnections) {
-            connection();
+        for (auto &pair : movedConnections) {
+            pair.second();
         }
     }
 
@@ -59,12 +63,24 @@ private:
     template<typename...>
     friend class Signal;
 
-    void addConnection(std::function<void()> connection)
+    void enqueueSlotInvocation(const ConnectionHandle &handle, const std::function<void()> &connection)
     {
-        connections.push_back(connection);
+        m_deferredConnections.push_back(std::make_pair(&handle, connection));
     }
 
-    std::list<std::function<void()>> connections;
+    void dequeueSlotInvocation(const ConnectionHandle &handle)
+    {
+        m_deferredConnections.erase(
+                std::remove_if(m_deferredConnections.begin(), m_deferredConnections.end(),
+                               [&handle](const auto &pair) {
+                                   return pair.first == &handle;
+                               }),
+                m_deferredConnections.end());
+    }
+
+    friend class ConnectionHandle;
+
+    std::vector<std::pair<const ConnectionHandle *, std::function<void()>>> m_deferredConnections;
     std::mutex connectionsMutex;
 };
 } // namespace KDBindings

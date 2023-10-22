@@ -95,27 +95,35 @@ TEST_CASE("Signal connections")
 
     SUBCASE("Disconnect Deferred Connection")
     {
-        Signal<int> signal;
+        Signal<int> signal1;
+        Signal<int, int> signal2;
         int val = 4;
         auto evaluator = std::make_shared<ConnectionEvaluator>();
 
-        auto connection = signal.connectDeferred(evaluator, [&val](int value) {
+        auto connection1 = signal1.connectDeferred(evaluator, [&val](int value) {
             val += value;
         });
 
-        REQUIRE(connection.isActive());
+        auto connection2 = signal2.connectDeferred(evaluator, [&val](int value1, int value2) {
+            val += value1;
+            val += value2;
+        });
 
-        signal.emit(4);
-        REQUIRE(val == 4); // val not changing immediately after emit 
+        REQUIRE(connection1.isActive());
 
-        connection.disconnect();
-        REQUIRE(!connection.isActive());
+        signal1.emit(4);
+        REQUIRE(val == 4); // val not changing immediately after emit
 
-        signal.emit(6); // It will not affect the result as the signal is disconnected
-        REQUIRE(val == 4);
+        signal2.emit(3, 2);
+        REQUIRE(val == 4); // val not changing immediately after emit
 
-        evaluator->evaluateDeferredConnections();
-        REQUIRE(val == 8);
+        connection1.disconnect();
+        REQUIRE(!connection1.isActive());
+
+        REQUIRE(connection2.isActive());
+
+        evaluator->evaluateDeferredConnections(); // It doesn't evaluate any slots of signal1 as it ConnectionHandle gets disconnected before the evaluation of the deferred connections.
+        REQUIRE(val == 9);
     }
 
     SUBCASE("Multiple Signals with Evaluator")
@@ -142,7 +150,7 @@ TEST_CASE("Signal connections")
 
         signal1.emit(2);
         signal2.emit(3);
-        REQUIRE(val == 4); // val not changing immediately after emit 
+        REQUIRE(val == 4); // val not changing immediately after emit
 
         evaluator->evaluateDeferredConnections();
 
@@ -175,7 +183,7 @@ TEST_CASE("Signal connections")
 
         thread1.join();
         thread2.join();
-        
+
         REQUIRE(val1 == 4);
         REQUIRE(val2 == 4);
 
@@ -185,7 +193,7 @@ TEST_CASE("Signal connections")
         REQUIRE(val2 == 7);
     }
 
-    SUBCASE("Deferred Connect, Emit, Delete, and Evaluate")
+    SUBCASE("Deferred Connect, Emit, Disconnect, and Evaluate")
     {
         Signal<int> signal;
         int val = 4;
@@ -201,9 +209,9 @@ TEST_CASE("Signal connections")
         REQUIRE(val == 4);
 
         connection.disconnect();
-        evaluator->evaluateDeferredConnections();
+        evaluator->evaluateDeferredConnections(); // It doesn't evaluate the slot as the signal gets disconnected before it's evaluation of the deferred connections.
 
-        REQUIRE(val == 6);
+        REQUIRE(val == 4);
     }
 
     SUBCASE("Double Evaluate Deferred Connections")
