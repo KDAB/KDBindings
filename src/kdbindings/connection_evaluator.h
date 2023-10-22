@@ -78,8 +78,6 @@ private:
                 m_deferredConnections.end());
     }
 
-    friend class ConnectionHandle;
-
     std::vector<std::pair<const ConnectionHandle *, std::function<void()>>> m_deferredConnections;
     std::mutex connectionsMutex;
 };
