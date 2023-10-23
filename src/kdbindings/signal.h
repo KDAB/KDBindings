@@ -242,6 +242,46 @@ class Signal
             return m_connections.insert({ slot });
         }
 
+        // Connect a callback function with Throttling
+        Private::GenerationalIndex connectWithThrottling(std::function<void(Args...)> const &slot, int interval)
+        {
+            std::chrono::milliseconds throttleDelay(interval);
+            auto lastCallTime = std::chrono::high_resolution_clock::now() - throttleDelay; // Initialize so it can be triggered immediately the first time.
+
+            auto throttleCallBack = [slot = std::move(slot), throttleDelay, lastCallTime](Args... args) mutable {
+                auto now = std::chrono::high_resolution_clock::now();
+                auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(now - lastCallTime);
+
+                if (elapsed.count() >= throttleDelay.count()) {
+                    slot(args...);
+                    lastCallTime = now;
+                }
+            };
+
+            return m_connections.insert({ throttleCallBack });
+        }
+
+        // Connect a callback function with Debouncing
+        Private::GenerationalIndex connectWithDebouncing(std::function<void(Args...)> const &slot, int interval)
+        {
+            std::chrono::milliseconds debounceDelay(interval);
+            auto lastEventTime = std::chrono::high_resolution_clock::now();
+            auto lastCallTime = lastEventTime - debounceDelay; // Initialize so it can be triggered immediately the first time.
+
+            auto debounceCallBack = [slot = std::move(slot), debounceDelay, lastEventTime, lastCallTime](Args... args) mutable {
+                auto now = std::chrono::high_resolution_clock::now();
+                lastEventTime = now;
+
+                auto timeSinceLastCall = std::chrono::duration_cast<std::chrono::milliseconds>(now - lastCallTime);
+                if (timeSinceLastCall.count() >= debounceDelay.count()) {
+                    slot(args...);
+                    lastCallTime = now;
+                }
+            };
+
+            return m_connections.insert({ debounceCallBack });
+        }
+
         // Disconnects a previously connected function
         void disconnect(const Private::GenerationalIndex &id) override
         {
