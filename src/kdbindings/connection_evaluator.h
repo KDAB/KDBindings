@@ -47,7 +47,7 @@ public:
         std::vector<std::pair<const ConnectionHandle *, std::function<void()>>> movedConnections;
 
         {
-            std::lock_guard<std::mutex> lock(connectionsMutex);
+            std::lock_guard<std::mutex> lock(m_connectionsMutex);
 
             // Move out the current connections and replace the original vector with an empty one.
             movedConnections = std::move(m_deferredConnections);
@@ -79,6 +79,6 @@ private:
     }
 
     std::vector<std::pair<const ConnectionHandle *, std::function<void()>>> m_deferredConnections;
-    std::mutex connectionsMutex;
+    std::mutex m_connectionsMutex;
 };
 } // namespace KDBindings
