@@ -26,7 +26,7 @@ namespace Private {
 // It allows ConnectionHandle to refer to this non-template class, which then dispatches
 // to the template implementation using virtual function calls.
 // It allows ConnectionHandle to be a non-template class.
-class SignalImplBase
+class SignalImplBase : public std::enable_shared_from_this<SignalImplBase>
 {
 public:
     SignalImplBase() = default;
@@ -157,6 +157,26 @@ public:
     {
         auto shared_impl = m_signalImpl.lock();
         return shared_impl && shared_impl == std::static_pointer_cast<Private::SignalImplBase>(signal.m_impl);
+    }
+
+    // Define an operator== function to compare ConnectionHandle objects.
+    bool operator==(const ConnectionHandle &other) const
+    {
+        auto thisSignalImpl = m_signalImpl.lock();
+        auto otherSignalImpl = other.m_signalImpl.lock();
+
+        // If both signalImpl pointers are valid, compare them along with the IDs.
+        if (thisSignalImpl && otherSignalImpl) {
+            return (thisSignalImpl == otherSignalImpl) && (m_id == other.m_id);
+        }
+
+        // If neither instance has an ID, and both signalImpl pointers are invalid, consider them equal.
+        if (!m_id.has_value() && !other.m_id.has_value() && !thisSignalImpl && !otherSignalImpl) {
+            return true;
+        }
+
+        // In all other cases, they are not equal.
+        return false;
     }
 
 private:

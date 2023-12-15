@@ -36,6 +36,11 @@ namespace Private {
 struct GenerationalIndex {
     uint32_t index = 0;
     uint32_t generation = 0;
+
+    bool operator==(const GenerationalIndex& rhs) const {
+        // Include both index and generation in the equality check
+        return index == rhs.index && generation == rhs.generation;
+    }
 };
 
 class GenerationalIndexAllocator

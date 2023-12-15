@@ -44,19 +44,12 @@ public:
      */
     void evaluateDeferredConnections()
     {
-        std::vector<std::pair<const ConnectionHandle *, std::function<void()>>> movedConnections;
+        std::lock_guard<std::mutex> lock(m_connectionsMutex);
 
-        {
-            std::lock_guard<std::mutex> lock(m_connectionsMutex);
-
-            // Move out the current connections and replace the original vector with an empty one.
-            movedConnections = std::move(m_deferredConnections);
-            m_deferredConnections.clear(); // This is actually redundant after a move, but makes the intent clear.
-        }
-
-        for (auto &pair : movedConnections) {
+        for (auto &pair : m_deferredConnections) {
             pair.second();
         }
+        m_deferredConnections.clear();
     }
 
 private:
@@ -65,20 +58,24 @@ private:
 
     void enqueueSlotInvocation(const ConnectionHandle &handle, const std::function<void()> &connection)
     {
-        m_deferredConnections.push_back(std::make_pair(&handle, connection));
+        m_deferredConnections.push_back({ handle, std::move(connection) });
     }
 
     void dequeueSlotInvocation(const ConnectionHandle &handle)
     {
+        std::lock_guard<std::mutex> lock(m_connectionsMutex);
+
+        auto handleMatches = [&handle](const auto &invocationPair) {
+            return invocationPair.first == handle;
+        };
+
+        // Remove all invocations that match the handle
         m_deferredConnections.erase(
-                std::remove_if(m_deferredConnections.begin(), m_deferredConnections.end(),
-                               [&handle](const auto &pair) {
-                                   return pair.first == &handle;
-                               }),
+                std::remove_if(m_deferredConnections.begin(), m_deferredConnections.end(), handleMatches),
                 m_deferredConnections.end());
     }
 
-    std::vector<std::pair<const ConnectionHandle *, std::function<void()>>> m_deferredConnections;
+    std::vector<std::pair<ConnectionHandle, std::function<void()>>> m_deferredConnections;
     std::mutex m_connectionsMutex;
 };
 } // namespace KDBindings

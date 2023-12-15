@@ -84,28 +84,34 @@ class Signal
         // value can be used to disconnect the function again.
         Private::GenerationalIndex connect(std::function<void(Args...)> const &slot)
         {
-            return m_connections.insert({ slot });
+            Connection newConnection;
+            newConnection.slot = slot;
+            return m_connections.insert(std::move(newConnection));
         }
 
         // Establish a deferred connection between signal and slot, where ConnectionEvaluator object
         // is used to queue all the connection to evaluate later. The returned
         // value can be used to disconnect the slot later.
-        Private::GenerationalIndex connectDeferred(const std::shared_ptr<ConnectionEvaluator> &evaluator, std::function<void(Args...)> const &slot, const ConnectionHandle &handle)
+        Private::GenerationalIndex connectDeferred(const std::shared_ptr<ConnectionEvaluator> &evaluator, std::function<void(const ConnectionHandle &, Args...)> const &slot)
         {
             auto weakEvaluator = std::weak_ptr<ConnectionEvaluator>(evaluator);
 
-            auto connection = [weakEvaluator = std::move(weakEvaluator), slot, &handle](Args... args) {
-                // Check if the ConnectionEvaluator is still alive
+            auto deferredSlot = [weakEvaluator = std::move(weakEvaluator), slot](const ConnectionHandle &handle, Args... args) {
                 if (auto evaluatorPtr = weakEvaluator.lock()) {
-                    auto lambda = [slot, args...]() {
-                        slot(args...);
+                    auto lambda = [slot, handle, args...]() {
+                        slot(handle, args...); // Call slot with ConnectionHandle and Args
                     };
                     evaluatorPtr->enqueueSlotInvocation(handle, lambda);
                 } else {
                     throw std::runtime_error("ConnectionEvaluator is no longer alive");
                 }
             };
-            return m_connections.insert({ connection, true });
+
+            Connection newConnection;
+            newConnection.m_connectionEvaluator = evaluator;
+            newConnection.slotDeferred = deferredSlot;
+
+            return m_connections.insert(std::move(newConnection));
         }
 
         // Disconnects a previously connected function
@@ -113,10 +119,13 @@ class Signal
         {
             // If the connection evaluator is still valid, remove any queued up slot invocations
             // associated with the given handle to prevent them from being evaluated in the future.
-            if (auto evaluatorPtr = m_connectionEvaluator.lock()) {
-                evaluatorPtr->dequeueSlotInvocation(handle);
-            }
+            auto connection = m_connections.get(id);
+            if (connection->slotDeferred) {
+                if (auto evaluatorPtr = connection->m_connectionEvaluator.lock()) {
 
+                    evaluatorPtr->dequeueSlotInvocation(handle);
+                }
+            }
             m_connections.erase(id);
         }
 
@@ -153,8 +162,7 @@ class Signal
             }
         }
 
-        // Calls all connected functions
-        void emit(Args... p) const
+        void emit(Args... p) /*const*/
         {
 
             const auto numEntries = m_connections.entriesSize();
@@ -168,7 +176,15 @@ class Signal
                     const auto con = m_connections.get(*index);
 
                     if (!con->blocked) {
-                        con->slot(p...);
+                        if (con->slotDeferred) {
+                            // Check if shared_from_this is safe to call
+                            if (auto sharedThis = shared_from_this(); sharedThis) {
+                                ConnectionHandle handle(sharedThis, *index);
+                                con->slotDeferred(handle, p...);
+                            }
+                        } else if (con->slot) {
+                            con->slot(p...);
+                        }
                     }
                 }
             }
@@ -178,11 +194,12 @@ class Signal
         friend class Signal;
         struct Connection {
             std::function<void(Args...)> slot;
-            bool isDeferred{ false };
+            std::function<void(const ConnectionHandle &, Args...)> slotDeferred;
+            std::weak_ptr<ConnectionEvaluator> m_connectionEvaluator; // Use shared_ptr for stronger ownership.
             bool blocked{ false };
         };
+
         mutable Private::GenerationalIndexArray<Connection> m_connections;
-        std::weak_ptr<ConnectionEvaluator> m_connectionEvaluator;
     };
 
 public:
@@ -242,14 +259,13 @@ public:
      * The `KDBindings::Signal` class itself is not thread-safe. While the `ConnectionEvaluator` is inherently
      * thread-safe, ensure that any concurrent access to this Signal is protected externally to maintain thread safety.
      */
-    ConnectionHandle connectDeferred(const std::shared_ptr<ConnectionEvaluator> &evaluator, std::function<void(Args...)> const &slot)
+    ConnectionHandle connectDeferred(const std::shared_ptr<ConnectionEvaluator> &evaluator, std::function<void(const ConnectionHandle &, Args...)> const &slot)
     {
         ensureImpl();
+
+        // Create a new ConnectionHandle instance for this connection
         ConnectionHandle handle(m_impl, {});
-        handle.setId(m_impl->connectDeferred(evaluator, slot, handle));
-
-        m_impl->m_connectionEvaluator = evaluator;
-
+        handle.setId(m_impl->connectDeferred(evaluator, slot));
         return handle;
     }
 
@@ -305,7 +321,7 @@ public:
      */
     void disconnect(const ConnectionHandle &handle)
     {
-        if (m_impl && handle.belongsTo(*this), handle.m_id.has_value()) {
+        if (m_impl && handle.belongsTo(*this) && handle.m_id.has_value()) {
             m_impl->disconnect(*handle.m_id, handle);
             // TODO check if Impl is now empty and reset
         } else {
