@@ -33,7 +33,7 @@ public:
 
     virtual ~SignalImplBase() = default;
 
-    virtual void disconnect(const GenerationalIndex &id, const ConnectionHandle &handle) = 0;
+    virtual void disconnect(const ConnectionHandle &handle) = 0;
     virtual bool blockConnection(const GenerationalIndex &id, bool blocked) = 0;
     virtual bool isConnectionActive(const GenerationalIndex &id) const = 0;
     virtual bool isConnectionBlocked(const GenerationalIndex &id) const = 0;
@@ -86,7 +86,7 @@ public:
     {
         if (m_id.has_value()) {
             if (auto shared_impl = checkedLock()) {
-                shared_impl->disconnect(*m_id, *this);
+                shared_impl->disconnect(*this);
             }
         }
 
