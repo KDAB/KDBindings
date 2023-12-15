@@ -86,14 +86,14 @@ TEST_CASE("Signal connections")
         int val = 4;
         auto evaluator = std::make_shared<ConnectionEvaluator>();
 
-        auto connection1 = signal1.connectDeferred(evaluator, [&val](int value) {
-            val += value;
-        });
+    auto connection1 = signal1.connectDeferred(evaluator, [&val](const ConnectionHandle& handle, int value) {
+        val += value;
+    });
 
-        auto connection2 = signal2.connectDeferred(evaluator, [&val](int value1, int value2) {
-            val += value1;
-            val += value2;
-        });
+    auto connection2 = signal2.connectDeferred(evaluator, [&val](const ConnectionHandle& handle, int value1, int value2) {
+        val += value1;
+        val += value2;
+    });
 
         REQUIRE(connection1.isActive());
 
@@ -120,13 +120,13 @@ TEST_CASE("Signal connections")
         auto evaluator = std::make_shared<ConnectionEvaluator>();
 
         std::thread thread1([&] {
-            signal1.connectDeferred(evaluator, [&val](int value) {
+            signal1.connectDeferred(evaluator, [&val](const ConnectionHandle& handle, int value) {
                 val += value;
             });
         });
 
         std::thread thread2([&] {
-            signal2.connectDeferred(evaluator, [&val](int value) {
+            signal2.connectDeferred(evaluator, [&val](const ConnectionHandle& handle, int value) {
                 val += value;
             });
         });
@@ -151,11 +151,11 @@ TEST_CASE("Signal connections")
         int val2 = 4;
         auto evaluator = std::make_shared<ConnectionEvaluator>();
 
-        signal1.connectDeferred(evaluator, [&val1](int value) {
+        signal1.connectDeferred(evaluator, [&val1](const ConnectionHandle& handle, int value) {
             val1 += value;
         });
 
-        signal2.connectDeferred(evaluator, [&val2](int value) {
+        signal2.connectDeferred(evaluator, [&val2](const ConnectionHandle& handle, int value) {
             val2 += value;
         });
 
@@ -185,7 +185,7 @@ TEST_CASE("Signal connections")
         int val = 4;
         auto evaluator = std::make_shared<ConnectionEvaluator>();
 
-        auto connection = signal.connectDeferred(evaluator, [&val](int value) {
+        auto connection = signal.connectDeferred(evaluator, [&val](const ConnectionHandle& handle, int value) {
             val += value;
         });
 
@@ -206,7 +206,7 @@ TEST_CASE("Signal connections")
         int val = 4;
         auto evaluator = std::make_shared<ConnectionEvaluator>();
 
-        signal.connectDeferred(evaluator, [&val](int value) {
+        signal.connectDeferred(evaluator, [&val](const ConnectionHandle& handle, int value) {
             val += value;
         });
 
