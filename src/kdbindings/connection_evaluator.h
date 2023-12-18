@@ -75,11 +75,6 @@ private:
                 std::remove_if(m_deferredConnections.begin(), m_deferredConnections.end(), handleMatches),
                 m_deferredConnections.end());
     }
-    void disconnectAllDeferred()
-    {
-        // Clear the vector of deferred connections
-        m_deferredConnections.clear();
-    }
 
     std::vector<std::pair<ConnectionHandle, std::function<void()>>> m_deferredConnections;
     std::mutex m_connectionsMutex;

@@ -236,17 +236,25 @@ TEST_CASE("Signal connections")
     SUBCASE("Disconnect deferred connection from deleted signal")
     {
         auto signal = new Signal<>();
+        auto anotherSignal = Signal<>();
         auto evaluator = std::make_shared<ConnectionEvaluator>();
         bool called = false;
+        bool anotherCalled = false;
 
         auto handle = signal->connectDeferred(evaluator, [&called]() { called = true; });
+        anotherSignal.connectDeferred(evaluator, [&anotherCalled]() { anotherCalled = true; });
+
         signal->emit();
+        anotherSignal.emit();
         delete signal;
 
-        handle.disconnect();
-        REQUIRE(called == false);
+        REQUIRE(!called);
+        REQUIRE(!anotherCalled);
         evaluator->evaluateDeferredConnections();
-        REQUIRE(called == false);
+        REQUIRE(!called);
+        // Make sure the other signal still works, even after deconstructing another
+        // signal that was connected to the same evaluator.
+        REQUIRE(anotherCalled);
     }
 
     SUBCASE("A signal with arguments can be connected to a lambda and invoked with l-value args")

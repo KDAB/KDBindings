@@ -92,14 +92,14 @@ class Signal
         // Establish a deferred connection between signal and slot, where ConnectionEvaluator object
         // is used to queue all the connection to evaluate later. The returned
         // value can be used to disconnect the slot later.
-        Private::GenerationalIndex connectDeferred(const std::shared_ptr<ConnectionEvaluator> &evaluator, std::function<void(const ConnectionHandle &, Args...)> const &slot)
+        Private::GenerationalIndex connectDeferred(const std::shared_ptr<ConnectionEvaluator> &evaluator, std::function<void(Args...)> const &slot)
         {
             auto weakEvaluator = std::weak_ptr<ConnectionEvaluator>(evaluator);
 
             auto deferredSlot = [weakEvaluator = std::move(weakEvaluator), slot](const ConnectionHandle &handle, Args... args) {
                 if (auto evaluatorPtr = weakEvaluator.lock()) {
-                    auto lambda = [slot, handle, args...]() {
-                        slot(handle, args...); // Call slot with ConnectionHandle and Args
+                    auto lambda = [slot, args...]() {
+                        slot(args...);
                     };
                     evaluatorPtr->enqueueSlotInvocation(handle, lambda);
                 } else {
@@ -140,30 +140,17 @@ class Signal
         // Disconnects all previously connected functions
         void disconnectAll()
         {
-            m_connections.clear();
-        }
-
-        void disconnectAllConnections()
-        {
             const auto numEntries = m_connections.entriesSize();
 
+            const auto sharedThis = shared_from_this();
             for (auto i = decltype(numEntries){ 0 }; i < numEntries; ++i) {
                 const auto indexOpt = m_connections.indexAtEntry(i);
-                if (indexOpt) {
-                    const auto con = m_connections.get(*indexOpt);
-                    if (con) {
-                        if (con->slot) {
-                            m_connections.clear();
-                        }
-
-                        if (con->slotDeferred && con->m_connectionEvaluator.lock()) {
-                            con->m_connectionEvaluator.lock()->disconnectAllDeferred();
-                        }
-
-                        m_connections.erase(*indexOpt);
-                    }
+                if (sharedThis && indexOpt) {
+                    disconnect(ConnectionHandle(sharedThis, *indexOpt));
                 }
             }
+
+            m_connections.clear();
         }
 
         bool blockConnection(const Private::GenerationalIndex &id, bool blocked) override
@@ -208,7 +195,6 @@ class Signal
 
                     if (!con->blocked) {
                         if (con->slotDeferred) {
-                            // Check if shared_from_this is safe to call
                             if (auto sharedThis = shared_from_this(); sharedThis) {
                                 ConnectionHandle handle(sharedThis, *index);
                                 con->slotDeferred(handle, p...);
@@ -255,11 +241,7 @@ public:
      */
     ~Signal()
     {
-        if (m_impl) {
-            m_impl->disconnectAllConnections();
-        } else {
-            disconnectAll();
-        }
+        disconnectAll();
     }
 
     /**
@@ -298,14 +280,8 @@ public:
     {
         ensureImpl();
 
-        // Create a wrapper function that includes the ConnectionHandle
-        auto wrapper = [slot](const ConnectionHandle &handle, Args... args) {
-            slot(args...);
-        };
-
-        // Call connectDeferred on the implementation with the wrapper function
         ConnectionHandle handle(m_impl, {});
-        handle.setId(m_impl->connectDeferred(evaluator, wrapper));
+        handle.setId(m_impl->connectDeferred(evaluator, slot));
         return handle;
     }
 
