@@ -382,7 +382,7 @@ public:
      */
     bool blockConnection(const ConnectionHandle &handle, bool blocked)
     {
-        if (m_impl && handle.belongsTo(*this), handle.m_id.has_value()) {
+        if (m_impl && handle.belongsTo(*this) && handle.m_id.has_value() ) {
             return m_impl->blockConnection(*handle.m_id, blocked);
         } else {
             throw std::out_of_range("Provided ConnectionHandle does not match any connection\nLikely the connection was deleted before!");

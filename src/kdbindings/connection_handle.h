@@ -84,10 +84,8 @@ public:
      **/
     void disconnect()
     {
-        if (m_id.has_value()) {
-            if (auto shared_impl = checkedLock()) {
-                shared_impl->disconnect(*this);
-            }
+        if (auto shared_impl = checkedLock()) {
+            shared_impl->disconnect(*this);
         }
 
         // ConnectionHandle is no longer active;
@@ -123,10 +121,8 @@ public:
      **/
     bool block(bool blocked)
     {
-        if (m_id.has_value()) {
-            if (auto shared_impl = checkedLock()) {
-                return shared_impl->blockConnection(*m_id, blocked);
-            }
+        if (auto shared_impl = checkedLock()) {
+            return shared_impl->blockConnection(*m_id, blocked);
         }
         throw std::out_of_range("Cannot block a non-active connection!");
     }
@@ -140,10 +136,9 @@ public:
      **/
     bool isBlocked() const
     {
-        if (m_id.has_value())
-            if (auto shared_impl = checkedLock()) {
-                return shared_impl->isConnectionBlocked(*m_id);
-            }
+        if (auto shared_impl = checkedLock()) {
+            return shared_impl->isConnectionBlocked(*m_id);
+        }
         throw std::out_of_range("Cannot check whether a non-active connection is blocked!");
     }
 
@@ -200,8 +195,8 @@ private:
     // still active
     std::shared_ptr<Private::SignalImplBase> checkedLock() const
     {
-        auto shared_impl = m_signalImpl.lock();
         if (m_id.has_value()) {
+            auto shared_impl = m_signalImpl.lock();
             if (shared_impl && shared_impl->isConnectionActive(*m_id)) {
                 return shared_impl;
             }
