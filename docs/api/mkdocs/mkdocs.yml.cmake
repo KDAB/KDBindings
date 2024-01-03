@@ -18,7 +18,7 @@ theme:
     text: 'Open Sans'
   favicon: assets/assets_logo_tree.svg
   logo: assets/transparentWhiteKDAB.svg
-copyright: "Copyright &copy; 2020-2023 Klar&auml;lvdalens Datakonsult AB (KDAB)<br>The Qt, C++ and OpenGL Experts<br><a href='https://www.kdab.com'>https://www.kdab.com/</a>"
+copyright: "Copyright &copy; Klar&auml;lvdalens Datakonsult AB (KDAB)<br>The Qt, C++ and OpenGL Experts<br><a href='https://www.kdab.com'>https://www.kdab.com/</a>"
 extra:
   # Disabling the generator notice is currently a
   # Insiders only feature.
