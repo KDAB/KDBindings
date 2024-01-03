@@ -11,7 +11,9 @@
 cmake_minimum_required(VERSION 3.12)
 project(KDBindings-Tests)
 
-include_directories(./doctest)
+# We use `SYSTEM` here, because we don't want to see warnings from doctest in clang-tidy.
+# See: https://www.reddit.com/r/cmake/comments/zhqq9f/comment/j34m17q/?utm_source=share&utm_medium=web2x&context=3
+include_directories(SYSTEM ./doctest)
 
 add_subdirectory(binding)
 add_subdirectory(node)
