@@ -62,9 +62,14 @@ TEST_CASE("Construction")
         index = array.insert(3);
 
         auto secondArray = std::move(array);
+        // NOLINTBEGIN(clang-analyzer-cplusplus.Move)
+        // Usually, the moved-from object is undefined, but we
+        // want to check the result of that move-construction,
+        // so we do have to access it.
         REQUIRE(array.entriesSize() == 0);
         REQUIRE(array.get(index) == nullptr);
         REQUIRE(array.get(index2) == nullptr);
+        // NOLINTEND(clang-analyzer-cplusplus.Move)
 
         REQUIRE(secondArray.entriesSize() == 2);
         REQUIRE(*secondArray.get(index) == 3);
