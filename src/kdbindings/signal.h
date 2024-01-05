@@ -263,17 +263,19 @@ public:
     /**
      * @brief Establishes a deferred connection between the provided evaluator and slot.
      *
+     * @warning Deferred connections are experimental and may be removed or changed in the future.
+     *
      * This function allows connecting an evaluator and a slot such that the slot's execution
      * is deferred until the conditions evaluated by the `evaluator` are met.
      *
-     * First argument to the function is reference to a shared pointer to the `ConnectionEvaluator` responsible for determining
+     * First argument to the function is reference to a shared pointer to the ConnectionEvaluator responsible for determining
      * when the slot should be executed.
      *
      * @return An instance of ConnectionHandle, that can be used to disconnect
      * or temporarily block the connection.
      *
      * @note
-     * The `KDBindings::Signal` class itself is not thread-safe. While the `ConnectionEvaluator` is inherently
+     * The Signal class itself is not thread-safe. While the ConnectionEvaluator is inherently
      * thread-safe, ensure that any concurrent access to this Signal is protected externally to maintain thread safety.
      */
     ConnectionHandle connectDeferred(const std::shared_ptr<ConnectionEvaluator> &evaluator, std::function<void(Args...)> const &slot)
@@ -382,7 +384,7 @@ public:
      */
     bool blockConnection(const ConnectionHandle &handle, bool blocked)
     {
-        if (m_impl && handle.belongsTo(*this) && handle.m_id.has_value() ) {
+        if (m_impl && handle.belongsTo(*this) && handle.m_id.has_value()) {
             return m_impl->blockConnection(*handle.m_id, blocked);
         } else {
             throw std::out_of_range("Provided ConnectionHandle does not match any connection\nLikely the connection was deleted before!");

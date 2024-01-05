@@ -11,6 +11,7 @@
 
 #include <kdbindings/genindex_array.h>
 #include <kdbindings/utils.h>
+#include <memory>
 
 namespace KDBindings {
 

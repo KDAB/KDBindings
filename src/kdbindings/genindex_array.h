@@ -37,8 +37,8 @@ struct GenerationalIndex {
     uint32_t index = 0;
     uint32_t generation = 0;
 
-    bool operator==(const GenerationalIndex& rhs) const {
-        // Include both index and generation in the equality check
+    bool operator==(const GenerationalIndex &rhs) const
+    {
         return index == rhs.index && generation == rhs.generation;
     }
 };
@@ -207,6 +207,6 @@ public:
     }
 };
 
-} //namespace Private
+} // namespace Private
 
 } // namespace KDBindings
