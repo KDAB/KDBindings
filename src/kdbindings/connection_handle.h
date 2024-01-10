@@ -9,6 +9,8 @@
   Contact KDAB at <info@kdab.com> for commercial licensing options.
 */
 
+#pragma once
+
 #include <kdbindings/genindex_array.h>
 #include <kdbindings/utils.h>
 #include <memory>
@@ -204,6 +206,101 @@ private:
         }
         return nullptr;
     }
+};
+
+/**
+ * @brief A ScopedConnection is a RAII-style way to make sure a Connection is disconnected.
+ *
+ * When the ScopedConnections scope ends, the connection this ScopedConnection guards will be disconnected.
+ *
+ * Example:
+ * - @ref 08-managing-connections/main.cpp
+ */
+class ScopedConnection
+{
+public:
+    /**
+     * @brief A ScopedConnection can be default constructed
+     *
+     * A default constructed ScopedConnection has no connection to guard.
+     * Therefore it does nothing when it is destructed, unless a ConnectionHandle is assigned to it.
+     */
+    ScopedConnection() = default;
+
+    /** A ScopedConnection can be move constructed */
+    ScopedConnection(ScopedConnection &&) = default;
+
+    /** A ScopedConnection cannot be copied */
+    ScopedConnection(const ScopedConnection &) = delete;
+    /** A ScopedConnection cannot be copied */
+    ScopedConnection &operator=(const ScopedConnection &) = delete;
+
+    /** A ScopedConnection can be move assigned */
+    ScopedConnection &operator=(ScopedConnection &&other)
+    {
+        m_connection.disconnect();
+        m_connection = std::move(other.m_connection);
+        return *this;
+    }
+
+    /**
+     * A ScopedConnection can be constructed from a ConnectionHandle
+     */
+    ScopedConnection(ConnectionHandle &&h)
+        : m_connection(std::move(h))
+    {
+    }
+
+    /**
+     * A ScopedConnection can be assigned from a ConnectionHandle
+     */
+    ScopedConnection &operator=(ConnectionHandle &&h)
+    {
+        return *this = ScopedConnection(std::move(h));
+    }
+
+    /**
+     * @return the handle to the connection this instance is managing
+     */
+    ConnectionHandle &handle()
+    {
+        return m_connection;
+    }
+
+    /**
+     * @overload
+     */
+    const ConnectionHandle &handle() const
+    {
+        return m_connection;
+    }
+
+    /**
+     * Convenience access to the underlying ConnectionHandle using the `->` operator.
+     */
+    ConnectionHandle *operator->()
+    {
+        return &m_connection;
+    }
+
+    /**
+     * @overload
+     */
+    const ConnectionHandle *operator->() const
+    {
+        return &m_connection;
+    }
+
+    /**
+     * When a ConnectionHandle is destructed it disconnects the connection it guards.
+     */
+    ~ScopedConnection()
+    {
+        m_connection.disconnect();
+    }
+
+private:
+    ConnectionHandle m_connection;
 };
 
 } // namespace KDBindings

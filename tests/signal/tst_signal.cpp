@@ -707,7 +707,14 @@ TEST_CASE("ScopedConnection")
 
             // This should drop the old connection of guard1
             guard1 = std::move(guard2);
-            CHECK(!guard2->isActive());
+            // Ideally we'd like to assert here that:
+            // CHECK(!guard2->isActive());
+            // However, this is not possible, as a moved-from ScopedConnection is
+            // undefined (as is any C++ object for that matter).
+            // But because we assert that `guard1` is still active after the scope
+            // ends and that numCalled is only 1 after the emit, we can be sure that
+            // `guard2` was moved from and didn't disconnect.
+
             CHECK(guard1->isActive());
 
             signal.emit();
@@ -728,7 +735,12 @@ TEST_CASE("ScopedConnection")
             ScopedConnection guard = signal.connect([&called]() { called = true; });
             REQUIRE(guard->isActive());
             into = std::move(guard);
-            REQUIRE_FALSE(guard->isActive());
+            // Ideally we'd like to assert here that:
+            // REQUIRE_FALSE(guard->isActive());
+            // However, this is not possible, as a moved-from ScopedConnection is
+            // undefined (as is any C++ object for that matter).
+            // But because we assert that `into` is still active after the scope
+            // ends, we can be sure that `guard` was moved from and didn't disconnect.
         }
         REQUIRE(into->isActive());
 
