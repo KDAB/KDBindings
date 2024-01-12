@@ -17,6 +17,8 @@ set(HEADERS
     property.h
     property_updater.h
     signal.h
+    connection_evaluator.h
+    connection_handle.h
     utils.h
 )
 

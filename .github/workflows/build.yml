@@ -1,0 +1,58 @@
+# SPDX-FileCopyrightText: 2023 Klarälvdalens Datakonsult AB, a KDAB Group company <info@kdab.com>
+#
+# SPDX-License-Identifier: MIT
+
+name: CI
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: true
+      matrix:
+        os:
+          - ubuntu-22.04
+          #- ubuntu-20.04
+          - windows-2022
+          #- windows-2019
+          - macos-12
+          #- macos-11
+        build_type:
+          - Debug
+          - Release
+
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v4
+
+      - name: Create build directory
+        run: mkdir build
+
+      - name: Install ninja-build tool
+        uses: turtlesec-no/get-ninja@main
+
+      - name: Make sure MSVC is found when Ninja generator is in use
+        uses: ilammy/msvc-dev-cmd@v1
+
+      - name: Configure project
+        run: >
+          cmake -S . -B ./build -G Ninja
+          -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
+          -DKDBindings_TESTS=${{ matrix.build_type == 'Debug' }}
+          -DKDBindings_EXAMPLES=${{ matrix.build_type == 'Debug' }}
+          -DKDBindings_DOCS=${{ matrix.build_type == 'Debug' && runner.os == 'Linux' }}
+
+      - name: Build Project
+        run: cmake --build ./build
+
+      - name: Run tests
+        if: ${{ matrix.build_type == 'Debug' }}
+        run: ctest --test-dir ./build -C ${{ matrix.build_type }} --output-on-failure
+
+      - name: Read tests log when it fails
+        uses: andstor/file-reader-action@v1
+        if: ${{ failure() && matrix.build_type == 'Debug' }}
+        with:
+          path: "./build/Testing/Temporary/LastTest.log"
