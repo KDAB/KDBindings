@@ -34,8 +34,8 @@ Stay up-to-date with KDAB product announcements:
 
 Licensing
 =========
-KDBindings is (C) 2020-2023, Klarälvdalens Datakonsult AB, and is available under the
-terms of the [MIT](https://github.com/KDAB/KDBindings/blob/main/LICENSES/MIT.txt) license.
+KDBindings is © Klarälvdalens Datakonsult AB and available under the terms of
+the [MIT](https://github.com/KDAB/KDBindings/blob/main/LICENSES/MIT.txt) license.
 
 Contact KDAB at <info@kdab.com> if you need different licensing options.
 

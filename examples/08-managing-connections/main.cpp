@@ -1,7 +1,7 @@
 /*
   This file is part of KDBindings.
 
-  SPDX-FileCopyrightText: 2021-2023 Klarälvdalens Datakonsult AB, a KDAB Group company <info@kdab.com>
+  SPDX-FileCopyrightText: 2021 Klarälvdalens Datakonsult AB, a KDAB Group company <info@kdab.com>
   Author: Leon Matthes <leon.matthes@kdab.com>
 
   SPDX-License-Identifier: MIT
@@ -39,7 +39,7 @@ int main()
 
     signal.emit(2);
 
-    ConnectionHandle handle  = signal.connect(displayLabelled, "Connection is not blocked");
+    ConnectionHandle handle = signal.connect(displayLabelled, "Connection is not blocked");
 
     signal.emit(3);
     {
