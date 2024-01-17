@@ -19,9 +19,6 @@ jobs:
           #- windows-2019
           - macos-12
           #- macos-11
-        build_type:
-          - Debug
-          - Release
 
     steps:
       - name: Checkout sources
@@ -37,22 +34,16 @@ jobs:
         uses: ilammy/msvc-dev-cmd@v1
 
       - name: Configure project
-        run: >
-          cmake -S . -B ./build -G Ninja
-          -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
-          -DKDBindings_TESTS=${{ matrix.build_type == 'Debug' }}
-          -DKDBindings_EXAMPLES=${{ matrix.build_type == 'Debug' }}
-          -DKDBindings_DOCS=${{ matrix.build_type == 'Debug' && runner.os == 'Linux' }}
+        run: cmake --preset=ci
 
       - name: Build Project
-        run: cmake --build ./build
+        run: cmake --build --preset=ci
 
       - name: Run tests
-        if: ${{ matrix.build_type == 'Debug' }}
-        run: ctest --test-dir ./build -C ${{ matrix.build_type }} --output-on-failure
+        run: ctest --preset=ci
 
       - name: Read tests log when it fails
         uses: andstor/file-reader-action@v1
-        if: ${{ failure() && matrix.build_type == 'Debug' }}
+        if: ${{ failure() }}
         with:
           path: "./build/Testing/Temporary/LastTest.log"
