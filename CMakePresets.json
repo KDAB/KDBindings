@@ -12,6 +12,43 @@
                 "KDBindings_TESTS" : "ON",
                 "KDBindings_EXAMPLES" : "ON"
             }
+        },
+        {
+            "name": "ci",
+            "displayName": "ci",
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/build-ci",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release",
+                "CMAKE_EXPORT_COMPILE_COMMANDS" : "ON",
+                "KDBindings_TESTS" : "ON",
+                "KDBindings_EXAMPLES" : "ON",
+                "KDBindings_DOCS" : "ON"
+            }
+        }
+    ],
+    "buildPresets": [
+        {
+            "name": "ci",
+            "configurePreset": "ci"
+        },
+        {
+            "name": "dev",
+            "configurePreset": "dev"
+        }
+    ],
+    "testPresets": [
+        {
+            "name": "ci",
+            "configurePreset": "ci",
+            "output": {"outputOnFailure": true},
+            "execution": {"noTestsAction": "error", "stopOnFailure": true}
+        },
+        {
+            "name": "dev",
+            "configurePreset": "dev",
+            "output": {"outputOnFailure": true},
+            "execution": {"noTestsAction": "error", "stopOnFailure": false}
         }
     ]
 }
