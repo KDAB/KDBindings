@@ -23,10 +23,8 @@ jobs:
 
         config:
           - name: clang-tidy
-            cmake_arg: '-DCMAKE_CXX_CLANG_TIDY=clang-tidy'
 
           - name: clazy
-            cmake_arg: '-DCMAKE_CXX_COMPILER=clazy'
             apt_pgks:
               - clazy
 
@@ -46,12 +44,8 @@ jobs:
         run: git submodule update --init --recursive
 
       - name: Configure project
-        run: >
-          cmake -S . -B ./build -G Ninja ${{ matrix.config.cmake_arg }}
-          --warn-uninitialized -Werror=dev
-          -DCMAKE_BUILD_TYPE=Debug
-          -DKDBindings_TESTS=True
+        run: cmake --preset=${{ matrix.config.name }}
 
       - name: Build Project
         id: ctest
-        run: cmake --build ./build
+        run: cmake --build --preset=${{ matrix.config.name }}

@@ -25,7 +25,44 @@
                 "KDBindings_EXAMPLES" : "ON",
                 "KDBindings_DOCS" : "ON"
             }
+        },
+        {
+            "name": "clazy",
+            "displayName": "clazy",
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/build-clazy",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug",
+                "CMAKE_CXX_COMPILER" : "clazy",
+                "KDBindings_TESTS" : "ON",
+                "KDBindings_EXAMPLES" : "ON"
+            },
+            "warnings": {
+                "uninitialized": true
+            },
+            "errors": {
+                "dev": true
+            }
+        },
+        {
+            "name": "clang-tidy",
+            "displayName": "clang-tidy",
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/build-clang-tidy",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug",
+                "CMAKE_CXX_CLANG_TIDY" : "clang-tidy",
+                "KDBindings_TESTS" : "ON",
+                "KDBindings_EXAMPLES" : "ON"
+            },
+            "warnings": {
+                "uninitialized": true
+            },
+            "errors": {
+                "dev": true
+            }
         }
+
     ],
     "buildPresets": [
         {
@@ -35,6 +72,14 @@
         {
             "name": "dev",
             "configurePreset": "dev"
+        },
+        {
+            "name": "clazy",
+            "configurePreset": "clazy"
+        },
+        {
+            "name": "clang-tidy",
+            "configurePreset": "clang-tidy"
         }
     ],
     "testPresets": [
