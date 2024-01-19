@@ -11,9 +11,11 @@
 
 #include "kdbindings/utils.h"
 #include <kdbindings/signal.h>
+#include <kdbindings/connection_evaluator.h>
 
 #include <stdexcept>
 #include <string>
+#include <thread>
 
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include <doctest.h>
@@ -26,6 +28,20 @@ static_assert(!std::is_copy_constructible<Signal<int>>{});
 static_assert(!std::is_copy_assignable<Signal<int>>{});
 static_assert(std::is_nothrow_move_constructible<Signal<int>>{});
 static_assert(std::is_nothrow_move_assignable<Signal<int>>{});
+
+static_assert(std::is_nothrow_destructible<ConnectionHandle>{});
+static_assert(std::is_nothrow_default_constructible<ConnectionHandle>{});
+static_assert(std::is_copy_constructible<ConnectionHandle>{});
+static_assert(std::is_copy_assignable<ConnectionHandle>{});
+static_assert(std::is_nothrow_move_constructible<ConnectionHandle>{});
+static_assert(std::is_nothrow_move_assignable<ConnectionHandle>{});
+
+static_assert(std::is_nothrow_destructible<ScopedConnection>{});
+static_assert(std::is_nothrow_default_constructible<ScopedConnection>{});
+static_assert(!std::is_copy_constructible<ScopedConnection>{});
+static_assert(!std::is_copy_assignable<ScopedConnection>{});
+static_assert(std::is_nothrow_move_constructible<ScopedConnection>{});
+static_assert(!std::is_nothrow_move_assignable<ScopedConnection>{});
 
 class Button
 {
@@ -75,6 +91,170 @@ TEST_CASE("Signal connections")
 
         signal.emit("The answer:", 42);
         REQUIRE(lambdaCalled == true);
+    }
+
+    SUBCASE("Disconnect Deferred Connection")
+    {
+        Signal<int> signal1;
+        Signal<int, int> signal2;
+        int val = 4;
+        auto evaluator = std::make_shared<ConnectionEvaluator>();
+
+        auto connection1 = signal1.connectDeferred(evaluator, [&val](int value) {
+            val += value;
+        });
+
+        auto connection2 = signal2.connectDeferred(evaluator, [&val](int value1, int value2) {
+            val += value1;
+            val += value2;
+        });
+
+        REQUIRE(connection1.isActive());
+
+        signal1.emit(4);
+        REQUIRE(val == 4); // val not changing immediately after emit
+
+        signal2.emit(3, 2);
+        REQUIRE(val == 4); // val not changing immediately after emit
+
+        connection1.disconnect();
+        REQUIRE(!connection1.isActive());
+
+        REQUIRE(connection2.isActive());
+
+        evaluator->evaluateDeferredConnections(); // It doesn't evaluate any slots of signal1 as it ConnectionHandle gets disconnected before the evaluation of the deferred connections.
+        REQUIRE(val == 9);
+    }
+
+    SUBCASE("Multiple Signals with Evaluator")
+    {
+        Signal<int> signal1;
+        Signal<int> signal2;
+        int val = 4;
+        auto evaluator = std::make_shared<ConnectionEvaluator>();
+
+        std::thread thread1([&] {
+            signal1.connectDeferred(evaluator, [&val](int value) {
+                val += value;
+            });
+        });
+
+        std::thread thread2([&] {
+            signal2.connectDeferred(evaluator, [&val](int value) {
+                val += value;
+            });
+        });
+
+        thread1.join();
+        thread2.join();
+
+        signal1.emit(2);
+        signal2.emit(3);
+        REQUIRE(val == 4); // val not changing immediately after emit
+
+        evaluator->evaluateDeferredConnections();
+
+        REQUIRE(val == 9);
+    }
+
+    SUBCASE("Emit Multiple Signals with Evaluator")
+    {
+        Signal<int> signal1;
+        Signal<int> signal2;
+        int val1 = 4;
+        int val2 = 4;
+        auto evaluator = std::make_shared<ConnectionEvaluator>();
+
+        signal1.connectDeferred(evaluator, [&val1](int value) {
+            val1 += value;
+        });
+
+        signal2.connectDeferred(evaluator, [&val2](int value) {
+            val2 += value;
+        });
+
+        std::thread thread1([&] {
+            signal1.emit(2);
+        });
+
+        std::thread thread2([&] {
+            signal2.emit(3);
+        });
+
+        thread1.join();
+        thread2.join();
+
+        REQUIRE(val1 == 4);
+        REQUIRE(val2 == 4);
+
+        evaluator->evaluateDeferredConnections();
+
+        REQUIRE(val1 == 6);
+        REQUIRE(val2 == 7);
+    }
+
+    SUBCASE("Deferred Connect, Emit, Disconnect, and Evaluate")
+    {
+        Signal<int> signal;
+        int val = 4;
+        auto evaluator = std::make_shared<ConnectionEvaluator>();
+
+        auto connection = signal.connectDeferred(evaluator, [&val](int value) {
+            val += value;
+        });
+
+        REQUIRE(connection.isActive());
+
+        signal.emit(2);
+        REQUIRE(val == 4);
+
+        connection.disconnect();
+        evaluator->evaluateDeferredConnections(); // It doesn't evaluate the slot as the signal gets disconnected before it's evaluation of the deferred connections.
+
+        REQUIRE(val == 4);
+    }
+
+    SUBCASE("Double Evaluate Deferred Connections")
+    {
+        Signal<int> signal;
+        int val = 4;
+        auto evaluator = std::make_shared<ConnectionEvaluator>();
+
+        signal.connectDeferred(evaluator, [&val](int value) {
+            val += value;
+        });
+
+        signal.emit(2);
+        REQUIRE(val == 4);
+
+        evaluator->evaluateDeferredConnections();
+        evaluator->evaluateDeferredConnections();
+
+        REQUIRE(val == 6);
+    }
+
+    SUBCASE("Disconnect deferred connection from deleted signal")
+    {
+        auto signal = new Signal<>();
+        auto anotherSignal = Signal<>();
+        auto evaluator = std::make_shared<ConnectionEvaluator>();
+        bool called = false;
+        bool anotherCalled = false;
+
+        auto handle = signal->connectDeferred(evaluator, [&called]() { called = true; });
+        anotherSignal.connectDeferred(evaluator, [&anotherCalled]() { anotherCalled = true; });
+
+        signal->emit();
+        anotherSignal.emit();
+        delete signal;
+
+        REQUIRE(!called);
+        REQUIRE(!anotherCalled);
+        evaluator->evaluateDeferredConnections();
+        REQUIRE(!called);
+        // Make sure the other signal still works, even after deconstructing another
+        // signal that was connected to the same evaluator.
+        REQUIRE(anotherCalled);
     }
 
     SUBCASE("A signal with arguments can be connected to a lambda and invoked with l-value args")
@@ -478,5 +658,93 @@ TEST_CASE("ConnectionHandle")
         otherSignal = std::move(signal);
         REQUIRE_FALSE(handle.belongsTo(signal));
         REQUIRE(handle.belongsTo(otherSignal));
+    }
+}
+
+TEST_CASE("ScopedConnection")
+{
+    SUBCASE("A default constructed ScopedConnection is inactive")
+    {
+        ScopedConnection guard;
+
+        REQUIRE_FALSE(guard->isActive());
+    }
+
+    SUBCASE("A ScopedConnection disconnects when it goes out of scope")
+    {
+        bool called = false;
+        Signal<> signal;
+        {
+            const ScopedConnection guard = signal.connect([&called]() { called = !called; });
+            REQUIRE(guard->isActive());
+            signal.emit();
+            REQUIRE(called);
+        }
+        signal.emit();
+        REQUIRE(called);
+    }
+
+    SUBCASE("A ScopedConnection disconnects when assigned a new ConnectionHandle")
+    {
+        int numCalled = 0;
+        Signal<> signal;
+        ScopedConnection guard = signal.connect([&numCalled]() { numCalled++; });
+        signal.emit();
+        CHECK_EQ(numCalled, 1);
+
+        guard = signal.connect([&numCalled]() { numCalled++; });
+        signal.emit();
+        CHECK_EQ(numCalled, 2);
+    }
+
+    SUBCASE("A ScopedConnection disconnects when move assigned")
+    {
+        int numCalled = 0;
+        Signal<> signal;
+        {
+            ScopedConnection guard1 = signal.connect([&numCalled]() { numCalled++; });
+            ScopedConnection guard2 = signal.connect([&numCalled]() { numCalled++; });
+
+            // This should drop the old connection of guard1
+            guard1 = std::move(guard2);
+            // Ideally we'd like to assert here that:
+            // CHECK(!guard2->isActive());
+            // However, this is not possible, as a moved-from ScopedConnection is
+            // undefined (as is any C++ object for that matter).
+            // But because we assert that `guard1` is still active after the scope
+            // ends and that numCalled is only 1 after the emit, we can be sure that
+            // `guard2` was moved from and didn't disconnect.
+
+            CHECK(guard1->isActive());
+
+            signal.emit();
+            CHECK_EQ(numCalled, 1);
+        }
+        // all connections should now be dropped
+        signal.emit();
+        CHECK_EQ(numCalled, 1);
+    }
+
+    SUBCASE("A ScopedConnection can be moved")
+    {
+        bool called = false;
+        Signal<> signal;
+        ScopedConnection into;
+        REQUIRE_FALSE(into->isActive());
+        {
+            ScopedConnection guard = signal.connect([&called]() { called = true; });
+            REQUIRE(guard->isActive());
+            into = std::move(guard);
+            // Ideally we'd like to assert here that:
+            // REQUIRE_FALSE(guard->isActive());
+            // However, this is not possible, as a moved-from ScopedConnection is
+            // undefined (as is any C++ object for that matter).
+            // But because we assert that `into` is still active after the scope
+            // ends, we can be sure that `guard` was moved from and didn't disconnect.
+        }
+        REQUIRE(into->isActive());
+
+        signal.emit();
+        REQUIRE(called);
     }
 }

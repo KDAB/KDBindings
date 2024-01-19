@@ -1,0 +1,99 @@
+{
+    "version": 2,
+    "configurePresets": [
+        {
+            "name": "dev",
+            "displayName": "dev",
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/build-dev",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug",
+                "CMAKE_EXPORT_COMPILE_COMMANDS" : "ON",
+                "KDBindings_TESTS" : "ON",
+                "KDBindings_EXAMPLES" : "ON"
+            }
+        },
+        {
+            "name": "ci",
+            "displayName": "ci",
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/build-ci",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release",
+                "CMAKE_EXPORT_COMPILE_COMMANDS" : "ON",
+                "KDBindings_TESTS" : "ON",
+                "KDBindings_EXAMPLES" : "ON",
+                "KDBindings_DOCS" : "ON"
+            }
+        },
+        {
+            "name": "clazy",
+            "displayName": "clazy",
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/build-clazy",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug",
+                "CMAKE_CXX_COMPILER" : "clazy",
+                "KDBindings_TESTS" : "ON",
+                "KDBindings_EXAMPLES" : "ON"
+            },
+            "warnings": {
+                "uninitialized": true
+            },
+            "errors": {
+                "dev": true
+            }
+        },
+        {
+            "name": "clang-tidy",
+            "displayName": "clang-tidy",
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/build-clang-tidy",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug",
+                "CMAKE_CXX_CLANG_TIDY" : "clang-tidy",
+                "KDBindings_TESTS" : "ON",
+                "KDBindings_EXAMPLES" : "ON"
+            },
+            "warnings": {
+                "uninitialized": true
+            },
+            "errors": {
+                "dev": true
+            }
+        }
+
+    ],
+    "buildPresets": [
+        {
+            "name": "ci",
+            "configurePreset": "ci"
+        },
+        {
+            "name": "dev",
+            "configurePreset": "dev"
+        },
+        {
+            "name": "clazy",
+            "configurePreset": "clazy"
+        },
+        {
+            "name": "clang-tidy",
+            "configurePreset": "clang-tidy"
+        }
+    ],
+    "testPresets": [
+        {
+            "name": "ci",
+            "configurePreset": "ci",
+            "output": {"outputOnFailure": true},
+            "execution": {"noTestsAction": "error", "stopOnFailure": true}
+        },
+        {
+            "name": "dev",
+            "configurePreset": "dev",
+            "output": {"outputOnFailure": true},
+            "execution": {"noTestsAction": "error", "stopOnFailure": false}
+        }
+    ]
+}

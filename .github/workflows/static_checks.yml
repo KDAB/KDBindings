@@ -1,0 +1,51 @@
+# SPDX-FileCopyrightText: 2024 Klarälvdalens Datakonsult AB, a KDAB Group company <info@kdab.com>
+#
+# SPDX-License-Identifier: MIT
+
+name: CI Static Checks
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-latest
+
+        config:
+          - name: clang-tidy
+
+          - name: clazy
+            apt_pgks:
+              - clazy
+
+    steps:
+      - name: Install ninja-build tool
+        uses: turtlesec-no/get-ninja@main
+
+      - name: Install dependencies on Ubuntu (${{ join(matrix.config.apt_pgks, ' ') }})
+        if: ${{ runner.os == 'Linux' && matrix.config.apt_pgks }}
+        run: |
+          sudo apt update -qq
+          echo ${{ join(matrix.config.apt_pgks, ' ') }} | xargs sudo apt install -y
+
+      - uses: actions/checkout@v4
+
+      - name: Fetch Git submodules
+        run: git submodule update --init --recursive
+
+      - name: Configure project
+        run: cmake --preset=${{ matrix.config.name }}
+
+      - name: Build Project
+        id: ctest
+        run: cmake --build --preset=${{ matrix.config.name }}

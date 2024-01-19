@@ -31,7 +31,7 @@ cmake_minimum_required(VERSION 3.12) # for `project(... HOMEPAGE_URL ...)`
 project(KDBindings
   DESCRIPTION "Bindings, from the comfort and speed of C++ and without Qt"
   LANGUAGES CXX
-  VERSION 1.0.1
+  VERSION 1.0.95
   HOMEPAGE_URL "https://github.com/KDAB/KDBindings"
 )
 
@@ -94,10 +94,6 @@ endif()
 
 if(${PROJECT_NAME}_DOCS)
   add_subdirectory(docs) # needs to go last, in case there are build source files
-else()
-  add_custom_target(docs
-    COMMAND ${CMAKE_COMMAND} -E echo "Sorry, there is no docs target since KDBindings_DOCS=OFF."
-    "Re-run cmake with the -DKDBindings_DOCS=ON option if you want to generate the documentation.")
 endif()
 
 if(${PROJECT_NAME}_IS_ROOT_PROJECT)
