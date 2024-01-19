@@ -1,5 +1,16 @@
 * v1.1.0 (unreleased)
+  - Feature: ConnectionEvaluator for deferred Signal/Slot evaluation and easy integration into multi-threaded environments (#48)
   - Feature: Add ScopedConnection for RAII-style connection management (#31)
+
+* v1.0.4
+  - Avoid error in presence of Windows min/max macros (#63)
+  - Fix Clang-Tidy failures (#49)
+
+* v1.0.3
+  - Fix for Windows compilation error due to `interface` keyword (#40)
+
+* v1.0.2
+  - Make KDBINDINGS_DECLARE_FUNCTION callable outside of KDBindings namespace (#38)
 
 * v1.0.1
   - Property: Make moved Signal private (#24 & #26) - BREAKING!
