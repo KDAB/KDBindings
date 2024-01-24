@@ -1,3 +1,6 @@
+* v1.0.5
+  - Avoid error in presence of Windows `interface` macro
+
 * v1.0.4
   - Avoid error in presence of Windows min/max macros (#63)
   - Fix Clang-Tidy failures (#49)
