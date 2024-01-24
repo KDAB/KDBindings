@@ -93,6 +93,48 @@ TEST_CASE("Signal connections")
         REQUIRE(lambdaCalled == true);
     }
 
+    SUBCASE("Test connectWithThrottling")
+    {
+        Signal<int> signal;
+
+        int count = 0;
+        auto handle = signal.connectWithThrottling([&count](int value) {
+            count++;
+        },
+                                                   100);
+
+        signal.emit(2);
+        REQUIRE(count == 1); // First emission should trigger the slot immediately
+
+        std::this_thread::sleep_for(std::chrono::milliseconds(50)); // Within the throttling interval
+        signal.emit(2);
+        REQUIRE(count == 1); // Second emission shouldn't trigger the slot due to throttling
+
+        std::this_thread::sleep_for(std::chrono::milliseconds(100)); // After the throttling interval
+        signal.emit(2);
+        REQUIRE(count == 2); // Third emission should trigger the slot
+    }
+    SUBCASE("Test connectWithDebouncing")
+    {
+        Signal<int> signal;
+        int count = 0;
+        auto handle = signal.connectWithDebouncing([&count](int value) {
+            count++;
+        },
+                                                   100);
+
+        signal.emit(1);
+        REQUIRE(count == 1); // Debouncing interval hasn't passed
+
+        std::this_thread::sleep_for(std::chrono::milliseconds(50)); // Still within the debouncing interval
+        signal.emit(2);
+        REQUIRE(count == 1); // Debouncing interval still hasn't passed
+
+        std::this_thread::sleep_for(std::chrono::milliseconds(50)); // After the debouncing interval
+        signal.emit(2);
+        REQUIRE(count == 2);
+    }
+
     SUBCASE("A signal with arguments can be connected to a lambda and invoked with const l-value args")
     {
         Signal<std::string, int> signal;
