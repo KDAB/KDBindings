@@ -272,6 +272,37 @@ public:
     }
 
     /**
+     * Establishes a connection between a signal and a slot, allowing the slot to access its own connection handle.
+     * This method is particularly useful for creating connections that can manage themselves, such as disconnecting
+     * after being triggered a certain number of times or under specific conditions. It wraps the given slot function
+     * to include a shared pointer to the ConnectionHandle as the first parameter, enabling the slot to interact with
+     * its own connection state directly.
+     *
+     * @param slot A std::function that takes a shared_ptr<ConnectionHandle> followed by the signal's parameter types.
+     * @return A shared_ptr to the ConnectionHandle associated with this connection, allowing for advanced connection management.
+     */
+    std::shared_ptr<ConnectionHandle> connectReflective(std::function<void(std::shared_ptr<ConnectionHandle>, Args...)> const &slot)
+    {
+        ensureImpl();
+
+        // Create a placeholder handle (with no ID yet)
+        auto handle = ConnectionHandle::create(m_impl, std::nullopt);
+
+        auto wrappedSlot = [this, slot, weakHandle = std::weak_ptr<ConnectionHandle>(handle)](Args... args) {
+            if (auto handle = weakHandle.lock()) { // Ensure the handle is still valid
+                slot(handle, args...);
+            }
+        };
+
+        // Connect the wrapped slot
+        auto id = m_impl->connect(wrappedSlot);
+
+        // Assign the ID to the handle now that it's known
+        handle->setId(id);
+        return handle;
+    }
+
+    /**
      * @brief Establishes a deferred connection between the provided evaluator and slot.
      *
      * @warning Deferred connections are experimental and may be removed or changed in the future.
