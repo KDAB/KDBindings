@@ -261,6 +261,27 @@ TEST_CASE("Signal connections")
         REQUIRE(anotherCalled);
     }
 
+    SUBCASE("Single Shot Connection")
+    {
+        Signal<int> mySignal;
+        int val = 5;
+
+        // Connect a reflective slot to the signal
+        auto handle = mySignal.connectReflective([&val](std::shared_ptr<ConnectionHandle> selfHandle, int value) {
+            val += value;
+
+            // Disconnect after handling the signal once
+            selfHandle->disconnect();
+        });
+
+        mySignal.emit(5); // This should trigger the slot and then disconnect it
+        REQUIRE(!handle->isActive());
+
+        mySignal.emit(5); // Signal Already disconnected
+
+        REQUIRE(val == 10);
+    }
+
     SUBCASE("A signal with arguments can be connected to a lambda and invoked with l-value args")
     {
         Signal<std::string, int> signal;
