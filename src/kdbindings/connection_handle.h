@@ -177,13 +177,6 @@ public:
         return false;
     }
 
-    // Factory method to create a ConnectionHandle
-    static std::shared_ptr<ConnectionHandle> create(const std::weak_ptr<Private::SignalImplBase>& signalImpl, std::optional<Private::GenerationalIndex> id) {
-        auto handle = std::shared_ptr<ConnectionHandle>(new ConnectionHandle(signalImpl, id));
-        handle->self = handle; // Keep a weak reference to self
-        return handle;
-    }
-
 private:
     template<typename...>
     friend class Signal;
@@ -214,6 +207,14 @@ private:
             }
         }
         return nullptr;
+    }
+
+    // Factory method to create a ConnectionHandle
+    static std::shared_ptr<ConnectionHandle> create(const std::weak_ptr<Private::SignalImplBase> &signalImpl, std::optional<Private::GenerationalIndex> id)
+    {
+        auto handle = std::shared_ptr<ConnectionHandle>(new ConnectionHandle(signalImpl, id));
+        handle->self = handle; // Keep a weak reference to self
+        return handle;
     }
 };
 
