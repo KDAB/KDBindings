@@ -267,19 +267,21 @@ TEST_CASE("Signal connections")
         int val = 5;
 
         // Connect a reflective slot to the signal
-        auto handle = mySignal.connectReflective([&val](std::shared_ptr<ConnectionHandle> selfHandle, int value) {
+        auto handle = mySignal.connectReflective([&val](ConnectionHandle &selfHandle, int value) {
             val += value;
 
             // Disconnect after handling the signal once
-            selfHandle->disconnect();
+            selfHandle.disconnect();
         });
 
         mySignal.emit(5); // This should trigger the slot and then disconnect it
-        REQUIRE(!handle->isActive());
 
-        mySignal.emit(5); // Signal Already disconnected
+        REQUIRE(!handle.isActive());
 
-        REQUIRE(val == 10);
+        mySignal.emit(5); // Since the slot is disconnected, this should not affect 'val'
+
+        // Check if the value remains unchanged after the second emit
+        REQUIRE(val == 10); // 'val' was incremented once to 10 by the first emit and should remain at 10
     }
 
     SUBCASE("A signal with arguments can be connected to a lambda and invoked with l-value args")
