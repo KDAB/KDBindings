@@ -261,34 +261,34 @@ public:
     }
 
     /**
-     * Establishes a connection between a signal and a slot, allowing the slot to access its own connection handle.
-     * This method is particularly useful for creating connections that can manage themselves, such as disconnecting
+     * Establishes a connection between a signal and a slot, allowing the slot to access and manage its own connection handle.
+     * This method is particularly useful for creating connections that can autonomously manage themselves, such as disconnecting
      * after being triggered a certain number of times or under specific conditions. It wraps the given slot function
-     * to include a shared pointer to the ConnectionHandle as the first parameter, enabling the slot to interact with
+     * to include a reference to the ConnectionHandle as the first parameter, enabling the slot to interact with
      * its own connection state directly.
      *
-     * @param slot A std::function that takes a shared_ptr<ConnectionHandle> followed by the signal's parameter types.
-     * @return A shared_ptr to the ConnectionHandle associated with this connection, allowing for advanced connection management.
+     * @param slot A std::function that takes a ConnectionHandle reference followed by the signal's parameter types.
+     * @return A ConnectionHandle to the newly established connection, allowing for advanced connection management.
      */
-    std::shared_ptr<ConnectionHandle> connectReflective(std::function<void(std::shared_ptr<ConnectionHandle>, Args...)> const &slot)
+    ConnectionHandle connectReflective(std::function<void(ConnectionHandle &, Args...)> const &slot)
     {
         ensureImpl();
 
-        // Create a placeholder handle (with no ID yet)
+        // Create a new ConnectionHandle with no ID initially. This handle will be used to manage the connection lifecycle.
         auto handle = ConnectionHandle::create(m_impl, std::nullopt);
 
-        auto wrappedSlot = [this, slot, weakHandle = std::weak_ptr<ConnectionHandle>(handle)](Args... args) {
-            if (auto handle = weakHandle.lock()) { // Ensure the handle is still valid
-                slot(handle, args...);
-            }
+        // Prepare the lambda that matches the signature expected by m_impl->connect
+        auto wrappedSlot = [this, handle, slot](Args... args) mutable {
+            // Directly invoke the user-provided slot with the handle and args
+            slot(*handle, args...);
         };
 
-        // Connect the wrapped slot
-        auto id = m_impl->connect(wrappedSlot);
+        // Connect the wrapped slot to the signal implementation.
+        // The handle ID is set after successful connection to manage this connection specifically.
+        handle->setId(m_impl->connect(wrappedSlot));
 
-        // Assign the ID to the handle now that it's known
-        handle->setId(id);
-        return handle;
+        // Return the ConnectionHandle, allowing the caller to manage the connection directly.
+        return *handle;
     }
 
     /**
