@@ -284,6 +284,29 @@ TEST_CASE("Signal connections")
         REQUIRE(val == 10); // 'val' was incremented once to 10 by the first emit and should remain at 10
     }
 
+    SUBCASE("Self-blocking connection")
+    {
+        Signal<int> mySignal;
+        int val = 5;
+
+        auto handle = mySignal.connectReflective([&val](ConnectionHandle &self, int value) {
+            val += value;
+            self.block(true);
+        });
+
+        REQUIRE_FALSE(handle.isBlocked());
+        mySignal.emit(5);
+        REQUIRE(val == 10);
+        REQUIRE(handle.isBlocked());
+
+        mySignal.emit(5);
+        REQUIRE(val == 10);
+
+        handle.block(false);
+        mySignal.emit(5);
+        REQUIRE(val == 15);
+    }
+
     SUBCASE("A signal with arguments can be connected to a lambda and invoked with l-value args")
     {
         Signal<std::string, int> signal;
