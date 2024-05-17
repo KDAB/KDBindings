@@ -28,7 +28,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Install ninja-build tool
-        uses: turtlesec-no/get-ninja@main
+        uses: aseprite/get-ninja@main
 
       - name: Make sure MSVC is found when Ninja generator is in use
         uses: ilammy/msvc-dev-cmd@v1
