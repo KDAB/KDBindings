@@ -107,7 +107,7 @@ class Signal
         {
             auto weakEvaluator = std::weak_ptr<ConnectionEvaluator>(evaluator);
 
-            auto deferredSlot = [weakEvaluator = std::move(weakEvaluator), slot](const ConnectionHandle &handle, Args... args) {
+            auto deferredSlot = [weakEvaluator = std::move(weakEvaluator), slot](ConnectionHandle &handle, Args... args) {
                 if (auto evaluatorPtr = weakEvaluator.lock()) {
                     auto lambda = [slot, args...]() {
                         slot(args...);
@@ -120,7 +120,15 @@ class Signal
 
             Connection newConnection;
             newConnection.m_connectionEvaluator = evaluator;
-            newConnection.slotDeferred = deferredSlot;
+            newConnection.slotReflective = deferredSlot;
+
+            return m_connections.insert(std::move(newConnection));
+        }
+
+        Private::GenerationalIndex connectReflective(std::function<void(ConnectionHandle &handle, Args...)> const &slot)
+        {
+            Connection newConnection;
+            newConnection.slotReflective = slot;
 
             return m_connections.insert(std::move(newConnection));
         }
@@ -138,7 +146,7 @@ class Signal
 
                 // Retrieve the connection associated with this id
                 auto connection = m_connections.get(id);
-                if (connection && connection->slotDeferred) {
+                if (connection && connection->m_connectionEvaluator.lock()) {
                     if (auto evaluatorPtr = connection->m_connectionEvaluator.lock()) {
                         evaluatorPtr->dequeueSlotInvocation(handle);
                     }
@@ -149,7 +157,8 @@ class Signal
         }
 
         // Disconnects all previously connected functions
-        void disconnectAll()
+        void
+        disconnectAll()
         {
             const auto numEntries = m_connections.entriesSize();
 
@@ -205,10 +214,10 @@ class Signal
                     const auto con = m_connections.get(*index);
 
                     if (!con->blocked) {
-                        if (con->slotDeferred) {
+                        if (con->slotReflective) {
                             if (auto sharedThis = shared_from_this(); sharedThis) {
                                 ConnectionHandle handle(sharedThis, *index);
-                                con->slotDeferred(handle, p...);
+                                con->slotReflective(handle, p...);
                             }
                         } else if (con->slot) {
                             con->slot(p...);
@@ -222,7 +231,7 @@ class Signal
         friend class Signal;
         struct Connection {
             std::function<void(Args...)> slot;
-            std::function<void(const ConnectionHandle &, Args...)> slotDeferred;
+            std::function<void(ConnectionHandle &, Args...)> slotReflective;
             std::weak_ptr<ConnectionEvaluator> m_connectionEvaluator;
             bool blocked{ false };
         };
@@ -285,21 +294,7 @@ public:
     {
         ensureImpl();
 
-        // Create a new ConnectionHandle with no ID initially. This handle will be used to manage the connection lifecycle.
-        auto handle = ConnectionHandle::create(m_impl, std::nullopt);
-
-        // Prepare the lambda that matches the signature expected by m_impl->connect
-        auto wrappedSlot = [this, handle, slot](Args... args) mutable {
-            // Directly invoke the user-provided slot with the handle and args
-            slot(*handle, args...);
-        };
-
-        // Connect the wrapped slot to the signal implementation.
-        // The handle ID is set after successful connection to manage this connection specifically.
-        handle->setId(m_impl->connect(wrappedSlot));
-
-        // Return the ConnectionHandle, allowing the caller to manage the connection directly.
-        return *handle;
+        return ConnectionHandle{ m_impl, m_impl->connectReflective(slot) };
     }
 
     /**
