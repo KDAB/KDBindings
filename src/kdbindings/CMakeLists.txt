@@ -6,6 +6,13 @@
 # Contact KDAB at <info@kdab.com> for commercial licensing options.
 #
 
+option(KDBINDINGS_ENABLE_WARN_UNUSED "Enable warnings for unused ConnectionHandles" OFF)
+
+configure_file(
+    "${PROJECT_SOURCE_DIR}/cmake/KDBindingsConfig.h.in"
+    "${CMAKE_BINARY_DIR}/include/KDBindingsConfig.h"
+)
+
 set(HEADERS
     binding.h
     binding_evaluator.h
@@ -36,6 +43,7 @@ set_target_properties(KDBindings PROPERTIES
 target_include_directories(KDBindings INTERFACE
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/..>
   $<INSTALL_INTERFACE:include>
+  $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/include>  # Include the build directory for the configured header
 )
 if(KDBindings_ERROR_ON_WARNING)
   if(MSVC)

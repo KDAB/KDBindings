@@ -11,11 +11,6 @@
 
 #pragma once
 
-// Enables compiler warnings for unused ConnectionHandle results.
-#ifndef KDBINDINGS_WARN_UNUSED
-#define KDBINDINGS_WARN_UNUSED [[nodiscard]]
-#endif
-
 #include <assert.h>
 #include <memory>
 #include <stdexcept>
@@ -25,6 +20,8 @@
 #include <kdbindings/connection_evaluator.h>
 #include <kdbindings/genindex_array.h>
 #include <kdbindings/utils.h>
+
+#include <KDBindingsConfig.h>
 
 /**
  * @brief The main namespace of the KDBindings library.
