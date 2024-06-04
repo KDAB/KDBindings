@@ -97,6 +97,12 @@
             "configurePreset": "dev",
             "output": {"outputOnFailure": true},
             "execution": {"noTestsAction": "error", "stopOnFailure": false}
+        },
+        {
+            "name": "clazy",
+            "configurePreset": "clazy",
+            "output": {"outputOnFailure": true},
+            "execution": {"noTestsAction": "error", "stopOnFailure": false}
         }
     ]
 }
