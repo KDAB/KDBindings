@@ -16,6 +16,10 @@
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include <doctest.h>
 
+// The expansion of TEST_CASE from doctest leads to a clazy warning.
+// As this issue originates from doctest, disable the warning.
+// clazy:excludeall=non-pod-global-static
+
 using namespace KDBindings;
 
 static_assert(std::is_nothrow_destructible<Property<int>>{});

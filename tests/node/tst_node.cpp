@@ -19,6 +19,10 @@
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include <doctest.h>
 
+// The expansion of TEST_CASE from doctest leads to a clazy warning.
+// As this issue originates from doctest, disable the warning.
+// clazy:excludeall=non-pod-global-static
+
 using namespace KDBindings;
 
 static_assert(std::is_destructible<Private::NodeInterface<float>>{});
@@ -404,15 +408,14 @@ TEST_CASE("bindable_value_type and operator_node")
         REQUIRE(node2.evaluate() == (OP(OP(VALUE))));   \
     }
 
-TEST_CASE("Test unary operators")
-{
+TEST_CASE("Test unary operators"){
     KDBINDINGS_UNARY_OPERATOR_TEST(!, bool, true)
 
-    KDBINDINGS_UNARY_OPERATOR_TEST(~, uint8_t, 25)
+            KDBINDINGS_UNARY_OPERATOR_TEST(~, uint8_t, 25)
 
-    KDBINDINGS_UNARY_OPERATOR_TEST(+, int, -10)
+                    KDBINDINGS_UNARY_OPERATOR_TEST(+, int, -10)
 
-    KDBINDINGS_UNARY_OPERATOR_TEST(-, int, 10)
+                            KDBINDINGS_UNARY_OPERATOR_TEST(-, int, 10)
 }
 
 #define KDBINDINGS_BINARY_OPERATOR_TEST(OP, TYPE, VALUE, OTHER)     \
