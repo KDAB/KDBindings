@@ -37,6 +37,13 @@ target_include_directories(KDBindings INTERFACE
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/..>
   $<INSTALL_INTERFACE:include>
 )
+if(KDBindings_ERROR_ON_WARNING)
+  if(MSVC)
+    target_compile_options(KDBindings INTERFACE /W3 /WX)
+  else()
+    target_compile_options(KDBindings INTERFACE -Wall -Wextra -Wpedantic -Werror)
+  endif()
+endif()
 
 # Generate library version files
 include(ECMSetupVersion)
