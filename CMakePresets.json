@@ -10,7 +10,8 @@
                 "CMAKE_BUILD_TYPE": "Debug",
                 "CMAKE_EXPORT_COMPILE_COMMANDS" : "ON",
                 "KDBindings_TESTS" : "ON",
-                "KDBindings_EXAMPLES" : "ON"
+                "KDBindings_EXAMPLES" : "ON",
+                "KDBindings_ERROR_ON_WARNING": "ON"
             }
         },
         {
@@ -23,7 +24,8 @@
                 "CMAKE_EXPORT_COMPILE_COMMANDS" : "ON",
                 "KDBindings_TESTS" : "ON",
                 "KDBindings_EXAMPLES" : "ON",
-                "KDBindings_DOCS" : "ON"
+                "KDBindings_DOCS" : "ON",
+                "KDBindings_ERROR_ON_WARNING": "ON"
             }
         },
         {
@@ -35,7 +37,8 @@
                 "CMAKE_BUILD_TYPE": "Debug",
                 "CMAKE_CXX_COMPILER" : "clazy",
                 "KDBindings_TESTS" : "ON",
-                "KDBindings_EXAMPLES" : "ON"
+                "KDBindings_EXAMPLES" : "ON",
+                "KDBindings_ERROR_ON_WARNING" : "ON"
             },
             "warnings": {
                 "uninitialized": true
