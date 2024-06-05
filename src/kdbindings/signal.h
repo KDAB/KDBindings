@@ -11,6 +11,7 @@
 
 #pragma once
 
+
 #include <assert.h>
 #include <memory>
 #include <stdexcept>
@@ -21,7 +22,7 @@
 #include <kdbindings/genindex_array.h>
 #include <kdbindings/utils.h>
 
-#include <KDBindingsConfig.h>
+#include <kdbindings/KDBindingsConfig.h>
 
 /**
  * @brief The main namespace of the KDBindings library.

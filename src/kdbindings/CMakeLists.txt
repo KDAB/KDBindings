@@ -6,12 +6,7 @@
 # Contact KDAB at <info@kdab.com> for commercial licensing options.
 #
 
-option(KDBINDINGS_ENABLE_WARN_UNUSED "Enable warnings for unused ConnectionHandles" OFF)
-
-configure_file(
-    "${PROJECT_SOURCE_DIR}/cmake/KDBindingsConfig.h.in"
-    "${CMAKE_BINARY_DIR}/include/KDBindingsConfig.h"
-)
+option(KDBINDINGS_ENABLE_WARN_UNUSED "Enable warnings for unused ConnectionHandles" ON)
 
 set(HEADERS
     binding.h
@@ -27,6 +22,7 @@ set(HEADERS
     connection_evaluator.h
     connection_handle.h
     utils.h
+    KDBindingsConfig.h
 )
 
 if(CMAKE_VERSION VERSION_GREATER_EQUAL "3.19.0")
@@ -40,10 +36,14 @@ add_library(KDAB::KDBindings ALIAS KDBindings)
 set_target_properties(KDBindings PROPERTIES
   INTERFACE_COMPILE_FEATURES cxx_std_17
 )
+
+if(KDBINDINGS_ENABLE_WARN_UNUSED)
+  target_compile_definitions(KDBindings INTERFACE KDBINDINGS_ENABLE_WARN_UNUSED=1)
+endif()
+
 target_include_directories(KDBindings INTERFACE
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/..>
   $<INSTALL_INTERFACE:include>
-  $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/include>  # Include the build directory for the configured header
 )
 if(KDBindings_ERROR_ON_WARNING)
   if(MSVC)

@@ -1,8 +1,5 @@
 #pragma once
 
-// Check if KDBINDINGS_ENABLE_WARN_UNUSED option is set
-#cmakedefine KDBINDINGS_ENABLE_WARN_UNUSED
-
 #ifdef KDBINDINGS_ENABLE_WARN_UNUSED
 #define KDBINDINGS_WARN_UNUSED [[nodiscard]]
 #else
