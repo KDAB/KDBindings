@@ -185,7 +185,7 @@ TEST_CASE("Binding expression updates")
                                       Private::makeNode(input)),
                     evaluator)
         };
-        prop1.valueChanged().connect([&ordering](int) { ordering.emplace_back(1); });
+        (void)prop1.valueChanged().connect([&ordering](int) { ordering.emplace_back(1); });
 
         auto prop2 = Property<int>{
             std::make_unique<Binding<int>>(
@@ -193,7 +193,7 @@ TEST_CASE("Binding expression updates")
                                       Private::makeNode(input)),
                     evaluator)
         };
-        prop2.valueChanged().connect([&ordering](int) { ordering.emplace_back(2); });
+        (void)prop2.valueChanged().connect([&ordering](int) { ordering.emplace_back(2); });
 
         input = 8;
         evaluator.evaluateAll();

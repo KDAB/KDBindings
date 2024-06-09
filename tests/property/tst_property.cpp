@@ -79,7 +79,7 @@ public:
 
     ClassWithProperty()
     {
-        property().valueChanged.connect(
+        (void)property().valueChanged.connect(
                 [this]() {
                     this->changed.emit();
                 });
@@ -92,7 +92,7 @@ TEST_CASE("An object with a Signal that is wrapped in a property can emit the Si
     auto handler = [&called]() { called = true; };
 
     ClassWithProperty outer;
-    outer.changed.connect(handler);
+    (void)outer.changed.connect(handler);
 
     outer.property().emitSignal();
 
@@ -159,7 +159,7 @@ TEST_CASE("Signals")
         auto handler = [&notified]() { notified = true; };
 
         auto p = new Property<int>{ 5 };
-        p->destroyed().connect(handler);
+        (void)p->destroyed().connect(handler);
 
         delete p;
         REQUIRE(notified == true);
@@ -254,7 +254,7 @@ TEST_CASE("Property Updaters")
             updatedValue = value;
             slotCalled = true;
         };
-        property.valueChanged().connect(handler);
+        (void)property.valueChanged().connect(handler);
 
         updater->set(123);
         REQUIRE(property.get() == 123);
@@ -299,7 +299,7 @@ TEST_CASE("Moving")
 
         auto property = Property<std::unique_ptr<int>>{ std::make_unique<int>(42) };
         property.valueChanged().connect(handlerVoid);
-        property.valueChanged().connect(handlerValue);
+        (void)property.valueChanged().connect(handlerValue);
 
         auto movedProperty{ std::move(property) };
         movedProperty.set(std::make_unique<int>(123));

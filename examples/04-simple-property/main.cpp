@@ -35,7 +35,7 @@ int main()
 {
     Widget w("A cool widget");
 
-    w.value.valueChanged().connect([](int newValue) {
+    (void)w.value.valueChanged().connect([](int newValue) {
         std::cout << "The new value is " << newValue << std::endl;
     });
 

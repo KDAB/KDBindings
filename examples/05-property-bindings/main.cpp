@@ -31,7 +31,7 @@ int main()
     Image img;
     std::cout << "The initial size of the image = " << img.byteSize.get() << " bytes" << std::endl;
 
-    img.byteSize.valueChanged().connect([](const int &newValue) {
+    (void)img.byteSize.valueChanged().connect([](const int &newValue) {
         std::cout << "The new size of the image = " << newValue << " bytes" << std::endl;
     });
 
