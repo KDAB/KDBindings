@@ -229,7 +229,7 @@ private:
     int m_value;
 };
 
-TEST_CASE("Property Updators")
+TEST_CASE("Property Updaters")
 {
     SUBCASE("Can construct a property with an updater and the property assumes its value")
     {
