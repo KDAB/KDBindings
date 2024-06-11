@@ -261,6 +261,15 @@ TEST_CASE("Property Updators")
         REQUIRE(slotCalled);
         REQUIRE(updatedValue == 123);
     }
+
+    SUBCASE("Can query a property to see if it has an updater")
+    {
+        Property<int> property(std::make_unique<DummyPropertyUpdater>(7));
+        REQUIRE(property.hasBinding() == true);
+
+        Property<int> property2(7);
+        REQUIRE(property2.hasBinding() == false);
+    }
 }
 
 TEST_CASE("Moving")

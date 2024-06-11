@@ -108,8 +108,8 @@ struct equal_to {
 // Property can declare PropertyNode as a friend
 // class.
 namespace Private {
-    template<typename PropertyType>
-    class PropertyNode;
+template<typename PropertyType>
+class PropertyNode;
 }
 
 /**
@@ -299,6 +299,11 @@ public:
      * Returns a Signal that will be emitted when this Property is destructed.
      */
     Signal<> &destroyed() const { return m_destroyed; }
+
+    /**
+     * Returns true if this Property has a binding associated with it.
+     */
+    bool hasBinding() const noexcept { return m_updater.get() != nullptr; }
 
     /**
      * Assign a new value to this Property.
