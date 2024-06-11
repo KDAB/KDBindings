@@ -38,7 +38,12 @@ jobs:
         run: cmake --preset=ci
 
       - name: Build Project
-        run: cmake --build --preset=ci
+        run: cmake --build --preset=ci --verbose
+
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
+        with:
+          limit-access-to-actor: false
 
       - name: Run tests
         run: ctest --preset=ci

@@ -28,6 +28,8 @@
 
 cmake_minimum_required(VERSION 3.12) # for `project(... HOMEPAGE_URL ...)`
 
+cmake_policy(SET CMP0141 NEW)
+
 project(KDBindings
   DESCRIPTION "Bindings, from the comfort and speed of C++ and without Qt"
   LANGUAGES CXX

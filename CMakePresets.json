@@ -20,7 +20,8 @@
             "generator": "Ninja",
             "binaryDir": "${sourceDir}/build-ci",
             "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Release",
+                "CMAKE_BUILD_TYPE": "RelWithDebInfo",
+                "CMAKE_MSVC_DEBUG_INFORMATION_FORMAT": "Embedded",
                 "CMAKE_EXPORT_COMPILE_COMMANDS" : "ON",
                 "KDBindings_TESTS" : "ON",
                 "KDBindings_EXAMPLES" : "ON",
