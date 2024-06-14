@@ -11,6 +11,7 @@
 
 #pragma once
 
+
 #include <assert.h>
 #include <memory>
 #include <stdexcept>
@@ -20,6 +21,8 @@
 #include <kdbindings/connection_evaluator.h>
 #include <kdbindings/genindex_array.h>
 #include <kdbindings/utils.h>
+
+#include <kdbindings/KDBindingsConfig.h>
 
 /**
  * @brief The main namespace of the KDBindings library.
@@ -253,7 +256,7 @@ public:
      * @return An instance of ConnectionHandle, that can be used to disconnect
      * or temporarily block the connection.
      */
-    ConnectionHandle connect(std::function<void(Args...)> const &slot)
+    KDBINDINGS_WARN_UNUSED ConnectionHandle connect(std::function<void(Args...)> const &slot)
     {
         ensureImpl();
 
@@ -278,7 +281,7 @@ public:
      * The Signal class itself is not thread-safe. While the ConnectionEvaluator is inherently
      * thread-safe, ensure that any concurrent access to this Signal is protected externally to maintain thread safety.
      */
-    ConnectionHandle connectDeferred(const std::shared_ptr<ConnectionEvaluator> &evaluator, std::function<void(Args...)> const &slot)
+    KDBINDINGS_WARN_UNUSED ConnectionHandle connectDeferred(const std::shared_ptr<ConnectionEvaluator> &evaluator, std::function<void(Args...)> const &slot)
     {
         ensureImpl();
 

@@ -138,13 +138,13 @@ TEST_CASE("Signal connections")
         auto evaluator = std::make_shared<ConnectionEvaluator>();
 
         std::thread thread1([&] {
-            signal1.connectDeferred(evaluator, [&val](int value) {
+            (void)signal1.connectDeferred(evaluator, [&val](int value) {
                 val += value;
             });
         });
 
         std::thread thread2([&] {
-            signal2.connectDeferred(evaluator, [&val](int value) {
+            (void)signal2.connectDeferred(evaluator, [&val](int value) {
                 val += value;
             });
         });
@@ -169,11 +169,11 @@ TEST_CASE("Signal connections")
         int val2 = 4;
         auto evaluator = std::make_shared<ConnectionEvaluator>();
 
-        signal1.connectDeferred(evaluator, [&val1](int value) {
+        (void)signal1.connectDeferred(evaluator, [&val1](int value) {
             val1 += value;
         });
 
-        signal2.connectDeferred(evaluator, [&val2](int value) {
+        (void)signal2.connectDeferred(evaluator, [&val2](int value) {
             val2 += value;
         });
 
@@ -224,7 +224,7 @@ TEST_CASE("Signal connections")
         int val = 4;
         auto evaluator = std::make_shared<ConnectionEvaluator>();
 
-        signal.connectDeferred(evaluator, [&val](int value) {
+        (void)signal.connectDeferred(evaluator, [&val](int value) {
             val += value;
         });
 
@@ -246,7 +246,7 @@ TEST_CASE("Signal connections")
         bool anotherCalled = false;
 
         auto handle = signal->connectDeferred(evaluator, [&called]() { called = true; });
-        anotherSignal.connectDeferred(evaluator, [&anotherCalled]() { anotherCalled = true; });
+        (void)anotherSignal.connectDeferred(evaluator, [&anotherCalled]() { anotherCalled = true; });
 
         signal->emit();
         anotherSignal.emit();
@@ -368,7 +368,7 @@ TEST_CASE("Signal connections")
         });
 
         int lambdaCallCount2 = 0;
-        signal.connect([&]() {
+        (void)signal.connect([&]() {
             ++lambdaCallCount2;
         });
 
@@ -396,7 +396,7 @@ TEST_CASE("Signal connections")
         handle = &result;
 
         int lambdaCallCount2 = 0;
-        signal.connect([&]() {
+        (void)signal.connect([&]() {
             ++lambdaCallCount2;
         });
 
@@ -413,12 +413,12 @@ TEST_CASE("Signal connections")
     {
         Signal<> signal;
         int lambdaCallCount = 0;
-        signal.connect([&]() {
+        (void)signal.connect([&]() {
             ++lambdaCallCount;
         });
 
         int lambdaCallCount2 = 0;
-        signal.connect([&]() {
+        (void)signal.connect([&]() {
             ++lambdaCallCount2;
         });
 
@@ -454,7 +454,7 @@ TEST_CASE("Moving")
         auto handler = [&count]() { ++count; };
 
         Signal<> signal;
-        signal.connect(handler);
+        (void)signal.connect(handler);
 
         Signal<> movedSignal{ std::move(signal) };
         movedSignal.emit();
@@ -467,7 +467,7 @@ TEST_CASE("Moving")
         auto handler = [&count]() { ++count; };
 
         Signal<> signal;
-        signal.connect(handler);
+        (void)signal.connect(handler);
 
         Signal<> movedSignal = std::move(signal);
         movedSignal.emit();

@@ -22,7 +22,7 @@ int main()
     Signal<std::string, int> signal;
 
     // Connect a lambda
-    signal.connect([](std::string arg1, int arg2) {
+    (void)signal.connect([](std::string arg1, int arg2) {
         std::cout << arg1 << " " << arg2 << std::endl;
     });
 
