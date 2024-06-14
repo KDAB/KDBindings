@@ -17,6 +17,16 @@
 #include <type_traits>
 #include <utility>
 
+#ifdef emit
+static_assert(false, "KDBindings is not compatible with Qt's 'emit' keyword.\n"
+                     "To use KDBindings with Qt, please define QT_NO_EMIT to disable Qt's 'emit' keyword.\n"
+                     "If you're using CMake you can set KDBindings_QT_NO_EMIT to ON to add this.");
+
+// Undefine emit to suppress more compiler errors after the static_assert failure.
+// Otherwise the compiler would drown our custom error message with more errors.
+#undef emit
+#endif
+
 #include <kdbindings/connection_evaluator.h>
 #include <kdbindings/genindex_array.h>
 #include <kdbindings/utils.h>
@@ -29,7 +39,6 @@
  * All public parts of KDBindings are members of this namespace.
  */
 namespace KDBindings {
-
 /**
  * @brief A Signal provides a mechanism for communication between objects.
  *

@@ -41,6 +41,7 @@ option(${PROJECT_NAME}_TESTS "Build the tests" ON)
 option(${PROJECT_NAME}_EXAMPLES "Build the examples" ON)
 option(${PROJECT_NAME}_DOCS "Build the API documentation" OFF)
 option(${PROJECT_NAME}_ERROR_ON_WARNING "Enable all compiler warnings and treat them as errors" OFF)
+option(${PROJECT_NAME}_QT_NO_EMIT "Qt Compatibility: Disable Qt's `emit` keyword" OFF)
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/ECM/modules)
