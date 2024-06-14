@@ -342,7 +342,7 @@ TEST_CASE("Binding reassignment")
         Property<int> source(0);
         auto bound = makeBoundProperty(source);
 
-        bound.valueChanged().connect([&called]() { called = true; });
+        (void)bound.valueChanged().connect([&called]() { called = true; });
 
         REQUIRE_FALSE(called);
 

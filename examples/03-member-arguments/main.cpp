@@ -40,11 +40,14 @@ int main()
     Person alice("Alice");
     Person bob("Bob");
 
-    alice.speak.connect(&Person::listen, &bob);
-    bob.speak.connect(&Person::listen, &alice);
+    auto connection1 = alice.speak.connect(&Person::listen, &bob);
+    auto connection2 = bob.speak.connect(&Person::listen, &alice);
 
     alice.speak.emit("Have a nice day!");
     bob.speak.emit("Thank you!");
+
+    connection1.disconnect();
+    connection2.disconnect();
 
     return 0;
 }

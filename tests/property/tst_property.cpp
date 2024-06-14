@@ -129,8 +129,8 @@ TEST_CASE("Signals")
         Handler handler;
         HandlerAboutToChange aboutToChangeHandler;
 
-        property.valueChanged().connect(&Handler::doSomething, &handler);
-        property.valueAboutToChange().connect(&HandlerAboutToChange::doSomething, &aboutToChangeHandler);
+        (void)property.valueChanged().connect(&Handler::doSomething, &handler);
+        (void)property.valueAboutToChange().connect(&HandlerAboutToChange::doSomething, &aboutToChangeHandler);
 
         property = 3;
         REQUIRE(property.get() == 3);
@@ -144,8 +144,8 @@ TEST_CASE("Signals")
         Handler handler;
         HandlerAboutToChange aboutToChangeHandler;
 
-        property.valueChanged().connect(&Handler::doSomething, &handler);
-        property.valueAboutToChange().connect(&HandlerAboutToChange::doSomething, &aboutToChangeHandler);
+        (void)property.valueChanged().connect(&Handler::doSomething, &handler);
+        (void)property.valueAboutToChange().connect(&HandlerAboutToChange::doSomething, &aboutToChangeHandler);
 
         property = 7;
         REQUIRE(property.get() == 7);
@@ -190,7 +190,7 @@ TEST_CASE("Equality")
 
         Property<EqualityTestStruct> property(EqualityTestStruct{ 0 });
 
-        property.valueChanged().connect([&callCount]() { ++callCount; });
+        (void)property.valueChanged().connect([&callCount]() { ++callCount; });
 
         property = EqualityTestStruct{ 1 };
         REQUIRE(callCount == 1);
@@ -298,7 +298,7 @@ TEST_CASE("Moving")
         auto handlerValue = [&countValue](const std::unique_ptr<int> &) { ++countValue; };
 
         auto property = Property<std::unique_ptr<int>>{ std::make_unique<int>(42) };
-        property.valueChanged().connect(handlerVoid);
+        (void)property.valueChanged().connect(handlerVoid);
         (void)property.valueChanged().connect(handlerValue);
 
         auto movedProperty{ std::move(property) };
