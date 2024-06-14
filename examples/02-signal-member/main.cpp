@@ -36,8 +36,9 @@ int main()
     Button button;
     Message message;
 
-    button.clicked.connect(&Message::display, &message);
+    auto connection = button.clicked.connect(&Message::display, &message);
     button.clicked.emit();
+    connection.disconnect();
 
     return 0;
 }

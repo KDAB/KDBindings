@@ -11,7 +11,6 @@
 
 #pragma once
 
-
 #include <assert.h>
 #include <memory>
 #include <stdexcept>
@@ -325,7 +324,7 @@ public:
     // std::function<void(Args...)>, as it otherwise tries to take precedence
     // over the normal connect function.
     template<typename Func, typename... FuncArgs, typename = std::enable_if_t<std::disjunction_v<std::negation<std::is_convertible<Func, std::function<void(Args...)>>>, std::integral_constant<bool, sizeof...(FuncArgs) /*Also enable this function if we want to bind at least one argument*/>>>>
-    ConnectionHandle connect(Func &&slot, FuncArgs &&...args)
+    KDBINDINGS_WARN_UNUSED ConnectionHandle connect(Func &&slot, FuncArgs &&...args)
     {
         std::function<void(Args...)> bound = Private::bind_first(std::forward<Func>(slot), std::forward<FuncArgs>(args)...);
         return connect(bound);

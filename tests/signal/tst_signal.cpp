@@ -70,7 +70,7 @@ public:
     template<typename Signal>
     CallbackCounter(Signal &s)
     {
-        s.connect(&CallbackCounter::callback, this);
+        (void)s.connect(&CallbackCounter::callback, this);
     }
 
     void callback()
@@ -310,7 +310,7 @@ TEST_CASE("Signal connections")
         Signal<bool, int> signal;
 
         auto lambdaCalled = false;
-        signal.connect([&lambdaCalled](bool value) { lambdaCalled = value; });
+        (void)signal.connect([&lambdaCalled](bool value) { lambdaCalled = value; });
         signal.emit(true, 5);
         REQUIRE(lambdaCalled);
 
@@ -324,11 +324,11 @@ TEST_CASE("Signal connections")
         auto signalValue = 0;
         auto boundValue = 0;
 
-        signal.connect([&signalValue, &boundValue](int bound, int signalled) {
+        (void)signal.connect([&signalValue, &boundValue](int bound, int signalled) {
             boundValue = bound;
             signalValue = signalled;
         },
-                       5);
+                             5);
 
         // The bound value should not have changed yet.
         REQUIRE(boundValue == 0);
@@ -347,10 +347,10 @@ TEST_CASE("Signal connections")
 
         // disambiguation necessary, as push_back is overloaded.
         void (std::vector<int>::*push_back)(const int &) = &std::vector<int>::push_back;
-        signal.connect(push_back, &numbers);
+        (void)signal.connect(push_back, &numbers);
 
         // this slot doesn't require the int argument, so it will be discarded.
-        signal.connect([&emitted]() { emitted = true; });
+        (void)signal.connect([&emitted]() { emitted = true; });
 
         signal.emit(4); // Will add 4 to the vector and set emitted to true
 

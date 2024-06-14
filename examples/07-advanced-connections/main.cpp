@@ -41,23 +41,28 @@ public:
 int main()
 {
     Signal<int> signal;
+    std::vector<ConnectionHandle> connections;
 
     // Signal::connect allows connecting functions that take too few arguments.
-    signal.connect(display);
+    connections.emplace_back(signal.connect(display));
 
     // As well as functions with too many arguments, as long as default values are provided.
-    signal.connect(displayLabelled, "Emitted value");
+    connections.emplace_back(signal.connect(displayLabelled, "Emitted value"));
 
     // This is very useful to connect member functions, where the first implicit argument
     // is a pointer to the "this" object.
     SignalHandler handler;
-    signal.connect(&SignalHandler::receive, &handler);
+    connections.emplace_back(signal.connect(&SignalHandler::receive, &handler));
 
     // This will print "Hello World!" and "Emitted value: 5" in an unspecified order.
     // It will also set handler.received to true
     signal.emit(5);
 
     std::cout << std::boolalpha << handler.received << std::endl;
+
+    for (auto &connection : connections) {
+        connection.disconnect();
+    }
 
     return 0;
 }
