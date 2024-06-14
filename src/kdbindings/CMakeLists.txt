@@ -6,8 +6,6 @@
 # Contact KDAB at <info@kdab.com> for commercial licensing options.
 #
 
-option(KDBINDINGS_ENABLE_WARN_UNUSED "Enable warnings for unused ConnectionHandles" ON)
-
 set(HEADERS
     binding.h
     binding_evaluator.h
@@ -37,7 +35,7 @@ set_target_properties(KDBindings PROPERTIES
   INTERFACE_COMPILE_FEATURES cxx_std_17
 )
 
-if(KDBINDINGS_ENABLE_WARN_UNUSED)
+if(KDBindings_ENABLE_WARN_UNUSED)
   target_compile_definitions(KDBindings INTERFACE KDBINDINGS_ENABLE_WARN_UNUSED=1)
 endif()
 
