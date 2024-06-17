@@ -38,6 +38,9 @@ set_target_properties(KDBindings PROPERTIES
 if(KDBindings_ENABLE_WARN_UNUSED)
   target_compile_definitions(KDBindings INTERFACE KDBINDINGS_ENABLE_WARN_UNUSED=1)
 endif()
+if(KDBindings_QT_NO_EMIT)
+  target_compile_definitions(KDBindings INTERFACE QT_NO_EMIT)
+endif()
 
 target_include_directories(KDBindings INTERFACE
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/..>

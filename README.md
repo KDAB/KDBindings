@@ -21,6 +21,16 @@ Find more information at:
  * [detailed browsable API reference](https://docs.kdab.com/kdbindings/latest/getting-started/)
  * [our assorted example programs](https://github.com/KDAB/KDBindings/blob/main/examples)
 
+Compatibility with Qt
+=====================
+Because Qt defines `emit` as a keyword, Qt is by default incompatible with KDBindings, which uses `emit` as a function name.
+
+This can only be fixed by defining `QT_NO_EMIT` or `QT_NO_KEYWORDS` and simply omitting `emit` in your Qt code.
+
+To make this easy, KDBindings includes a CMake option: `KDBindings_QT_NO_EMIT`, which defines this for all dependents of KDBindings.
+
+See also: [#79](https://github.com/KDAB/KDBindings/issues/79)
+
 Contact
 =======
 * Visit us on GitHub: https://github.com/KDAB/KDBindings
