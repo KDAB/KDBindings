@@ -148,20 +148,22 @@ private:
     T m_value;
 };
 
-template<typename PropertyType>
+template<typename PropertyType, bool IsConst>
 class PropertyNode : public NodeInterface<PropertyType>
 {
 public:
-    explicit PropertyNode(Property<PropertyType> &property)
+    using PropertyReference = std::conditional_t<IsConst, const Property<PropertyType> &, Property<PropertyType> &>;
+
+    explicit PropertyNode(PropertyReference property)
         : m_parent(nullptr), m_dirty(false)
     {
         setProperty(property);
     }
 
     // PropertyNodes cannot be moved
-    PropertyNode(PropertyNode<PropertyType> &&) = delete;
+    PropertyNode(PropertyNode<PropertyType, IsConst> &&) = delete;
 
-    PropertyNode(const PropertyNode<PropertyType> &other)
+    PropertyNode(const PropertyNode<PropertyType, IsConst> &other)
         : Dirtyable(other.isDirty())
     {
         setProperty(*other.m_property);
@@ -170,8 +172,10 @@ public:
     virtual ~PropertyNode()
     {
         m_valueChangedHandle.disconnect();
-        m_movedHandle.disconnect();
-        m_destroyedHandle.disconnect();
+        if constexpr (!IsConst) {
+            m_movedHandle.disconnect();
+            m_destroyedHandle.disconnect();
+        }
     }
 
     const PropertyType &evaluate() const override
@@ -206,15 +210,21 @@ protected:
     const bool *dirtyVariable() const override { return &m_dirty; }
 
 private:
-    void setProperty(Property<PropertyType> &property)
+    void setProperty(PropertyReference property)
     {
         m_property = &property;
-        m_valueChangedHandle = m_property->valueChanged().connect(&PropertyNode<PropertyType>::markDirty, this);
-        m_movedHandle = m_property->m_moved.connect(&PropertyNode<PropertyType>::propertyMoved, this);
-        m_destroyedHandle = m_property->destroyed().connect(&PropertyNode<PropertyType>::propertyDestroyed, this);
+
+        // Connect to the valueChanged signal in all cases
+        m_valueChangedHandle = m_property->valueChanged().connect([this]() { this->markDirty(); });
+
+        // Only connect move and destruction signals if property is non-const
+        if constexpr (!IsConst) {
+            m_movedHandle = m_property->m_moved.connect([this](Property<PropertyType> &newProp) { this->propertyMoved(newProp); });
+            m_destroyedHandle = m_property->destroyed().connect([this]() { this->propertyDestroyed(); });
+        }
     }
 
-    Property<PropertyType> *m_property;
+    std::conditional_t<IsConst, const Property<PropertyType> *, Property<PropertyType> *> m_property;
     ConnectionHandle m_movedHandle;
     ConnectionHandle m_valueChangedHandle;
     ConnectionHandle m_destroyedHandle;

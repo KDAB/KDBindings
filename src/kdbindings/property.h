@@ -108,8 +108,8 @@ struct equal_to {
 // Property can declare PropertyNode as a friend
 // class.
 namespace Private {
-template<typename PropertyType>
-class PropertyNode;
+    template<typename PropertyType, bool IsConst>
+    class PropertyNode;
 }
 
 /**
