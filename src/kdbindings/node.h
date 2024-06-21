@@ -233,64 +233,6 @@ private:
     mutable bool m_dirty;
 };
 
-template<typename PropertyType>
-class ConstPropertyNode : public NodeInterface<PropertyType>
-{
-public:
-    explicit ConstPropertyNode(const Property<PropertyType> &property)
-        : m_parent(nullptr), m_dirty(false), m_property(&property)
-    {
-        m_valueChangedHandle = property.valueChanged().connect(&ConstPropertyNode<PropertyType>::markDirty, this);
-        m_destroyedHandle = property.destroyed().connect(&ConstPropertyNode<PropertyType>::propertyDestroyed, this);
-    }
-
-    // Copy constructor
-    ConstPropertyNode(const ConstPropertyNode<PropertyType> &other)
-        : m_parent(nullptr), m_dirty(false), m_property(other.m_property)
-    {
-        if (m_property) {
-            m_valueChangedHandle = m_property->valueChanged().connect(&ConstPropertyNode<PropertyType>::markDirty, this);
-            m_destroyedHandle = m_property->destroyed().connect(&ConstPropertyNode<PropertyType>::propertyDestroyed, this);
-        }
-    }
-
-    // Move constructor is deleted to prevent moving a const reference
-    ConstPropertyNode(ConstPropertyNode<PropertyType> &&) = delete;
-
-    virtual ~ConstPropertyNode()
-    {
-        m_valueChangedHandle.disconnect();
-        m_destroyedHandle.disconnect();
-    }
-
-    const PropertyType &evaluate() const override
-    {
-        if (!m_property) {
-            throw PropertyDestroyedError("The Property this node refers to no longer exists!");
-        }
-
-        m_dirty = false;
-        return m_property->get();
-    }
-
-    void propertyDestroyed()
-    {
-        m_property = nullptr;
-    }
-
-protected:
-    Dirtyable **parentVariable() override { return &m_parent; }
-    const bool *dirtyVariable() const override { return &m_dirty; }
-
-private:
-    const Property<PropertyType> *m_property;
-    ConnectionHandle m_valueChangedHandle;
-    ConnectionHandle m_destroyedHandle;
-
-    Dirtyable *m_parent;
-    mutable bool m_dirty;
-};
-
 template<typename ResultType, typename Operator, typename... Ts>
 class OperatorNode : public NodeInterface<ResultType>
 {
