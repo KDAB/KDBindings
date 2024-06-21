@@ -384,7 +384,7 @@ private:
     // Ideally we would like to figure out a way to remove the moved signal entirely
     // at some point. However currently it is still needed for Property bindings to
     // keep track of moved Properties.
-    template<typename PropertyType>
+    template<typename PropertyType, bool IsConst>
     friend class Private::PropertyNode;
     Signal<Property<T> &> m_moved;
 
