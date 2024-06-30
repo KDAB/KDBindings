@@ -108,8 +108,8 @@ struct equal_to {
 // Property can declare PropertyNode as a friend
 // class.
 namespace Private {
-    template<typename PropertyType, bool IsConst>
-    class PropertyNode;
+template<typename PropertyType>
+class PropertyNode;
 }
 
 /**
@@ -384,9 +384,9 @@ private:
     // Ideally we would like to figure out a way to remove the moved signal entirely
     // at some point. However currently it is still needed for Property bindings to
     // keep track of moved Properties.
-    template<typename PropertyType, bool IsConst>
+    template<typename PropertyType>
     friend class Private::PropertyNode;
-    Signal<Property<T> &> m_moved;
+    mutable Signal<Property<T> &> m_moved;
 
     mutable Signal<> m_destroyed;
     std::unique_ptr<PropertyUpdater<T>> m_updater;

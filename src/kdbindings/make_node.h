@@ -71,13 +71,13 @@ inline Node<std::decay_t<T>> makeNode(T &&value)
 template<typename T>
 inline Node<T> makeNode(Property<T> &property)
 {
-    return Node<T>(std::make_unique<PropertyNode<T, false>>(property));
+    return Node<T>(std::make_unique<PropertyNode<T>>(property));
 }
 
 template<typename T>
 inline Node<T> makeNode(const Property<T> &property)
 {
-    return Node<T>(std::make_unique<PropertyNode<T, true>>(property));
+    return Node<T>(std::make_unique<PropertyNode<T>>(property));
 }
 
 template<typename T>

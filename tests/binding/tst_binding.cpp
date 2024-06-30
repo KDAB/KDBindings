@@ -340,7 +340,7 @@ TEST_CASE("Binding with const Property")
         REQUIRE(bound.get() == 5);
 
         bool called = false;
-        bound.valueChanged().connect([&called]() { called = true; });
+        (void)bound.valueChanged().connect([&called]() { called = true; });
 
         source = 10; // Change the original non-const property
         REQUIRE(called);
