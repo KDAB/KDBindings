@@ -10,6 +10,7 @@
                 "CMAKE_BUILD_TYPE": "Debug",
                 "CMAKE_EXPORT_COMPILE_COMMANDS" : "ON",
                 "KDBindings_TESTS" : "ON",
+                "KDBindings_DOCS" : "ON",
                 "KDBindings_EXAMPLES" : "ON",
                 "KDBindings_ERROR_ON_WARNING": "ON"
             }
