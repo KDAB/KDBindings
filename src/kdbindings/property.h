@@ -386,7 +386,7 @@ private:
     // keep track of moved Properties.
     template<typename PropertyType>
     friend class Private::PropertyNode;
-    Signal<Property<T> &> m_moved;
+    mutable Signal<Property<T> &> m_moved;
 
     mutable Signal<> m_destroyed;
     std::unique_ptr<PropertyUpdater<T>> m_updater;

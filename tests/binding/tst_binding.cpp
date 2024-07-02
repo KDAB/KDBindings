@@ -313,6 +313,41 @@ TEST_CASE("Create property bindings using helper function")
     }
 }
 
+TEST_CASE("Binding with const Property")
+{
+    SUBCASE("A binding created from a const property reflects its value")
+    {
+        const Property<int> constSource(5);
+        auto bound = makeBoundProperty(constSource);
+
+        REQUIRE(bound.get() == 5); // Ensure the bound property reflects the const source
+    }
+
+    SUBCASE("A binding to a const property does not allow modification through set")
+    {
+        const Property<int> constSource(5);
+        auto bound = makeBoundProperty(constSource);
+
+        REQUIRE_THROWS_AS(bound.set(10), ReadOnlyProperty);
+    }
+
+    SUBCASE("Updates to const property are reflected in the binding")
+    {
+        Property<int> source(5);
+        const Property<int> &constRefSource = source; // Create a const reference to a non-const Property
+        auto bound = makeBoundProperty(constRefSource);
+
+        REQUIRE(bound.get() == 5);
+
+        bool called = false;
+        (void)bound.valueChanged().connect([&called]() { called = true; });
+
+        source = 10; // Change the original non-const property
+        REQUIRE(called);
+        REQUIRE(bound.get() == 10);
+    }
+}
+
 TEST_CASE("Binding reassignment")
 {
     SUBCASE("A binding can not be override by a constant value")
