@@ -117,7 +117,7 @@ protected:
  * @return std::unique_ptr<Binding<T, EvaluatorT>> A new Binding that is powered by the evaluator.
  *
  * *Note: For the difference between makeBinding and makeBoundProperty, see the
- * ["Reassigning a Binding"](../../getting-started/data-binding/#reassigning-a-binding) section in the Getting Started guide.*
+ * ["Reassigning a Binding"](../getting-started/data-binding/#reassigning-a-binding) section in the Getting Started guide.*
  */
 template<typename T, typename EvaluatorT>
 inline std::unique_ptr<Binding<T, EvaluatorT>> makeBinding(EvaluatorT &evaluator, Property<T> &property)
@@ -153,7 +153,7 @@ inline std::unique_ptr<Binding<T, EvaluatorT>> makeBinding(EvaluatorT &evaluator
  * @return std::unique_ptr<Binding<T, EvaluatorT>> A new Binding that combines the rootNode with the evaluator.
  *
  * *Note: For the difference between makeBinding and makeBoundProperty, see the
- * ["Reassigning a Binding"](../../getting-started/data-binding/#reassigning-a-binding) section in the Getting Started guide.*
+ * ["Reassigning a Binding"](../getting-started/data-binding/#reassigning-a-binding) section in the Getting Started guide.*
  */
 template<typename T, typename EvaluatorT>
 inline std::unique_ptr<Binding<T, EvaluatorT>> makeBinding(EvaluatorT &evaluator, Private::Node<T> &&rootNode)
@@ -175,7 +175,7 @@ inline std::unique_ptr<Binding<T, EvaluatorT>> makeBinding(EvaluatorT &evaluator
  *          The Binding will be powered by the new evaluator.
  *
  * *Note: For the difference between makeBinding and makeBoundProperty, see the
- * ["Reassigning a Binding"](../../getting-started/data-binding/#reassigning-a-binding) section in the Getting Started guide.*
+ * ["Reassigning a Binding"](../getting-started/data-binding/#reassigning-a-binding) section in the Getting Started guide.*
  */
 template<typename EvaluatorT, typename Func, typename... Args, typename = std::enable_if_t<sizeof...(Args) != 0>, typename ResultType = Private::operator_node_result_t<Func, Args...>>
 inline std::unique_ptr<Binding<ResultType, EvaluatorT>> makeBinding(EvaluatorT &evaluator, Func &&func, Args &&...args)
@@ -237,7 +237,7 @@ public:
  *        An new Binding bound to an existing Property with immediate evaluation.
  *
  * *Note: For the difference between makeBinding and makeBoundProperty, see the
- * ["Reassigning a Binding"](../../getting-started/data-binding/#reassigning-a-binding) section in the Getting Started guide.*
+ * ["Reassigning a Binding"](../getting-started/data-binding/#reassigning-a-binding) section in the Getting Started guide.*
  */
 template<typename T>
 inline std::unique_ptr<Binding<T, ImmediateBindingEvaluator>> makeBinding(Property<T> &property)
@@ -272,7 +272,7 @@ inline std::unique_ptr<Binding<T, ImmediateBindingEvaluator>> makeBinding(const 
  * @return std::unique_ptr<Binding<<T, ImmediateBindingEvaluator>> An new Binding bound to a root Node with immediate evaluation.
  *
  * *Note: For the difference between makeBinding and makeBoundProperty, see the
- * ["Reassigning a Binding"](../../getting-started/data-binding/#reassigning-a-binding) section in the Getting Started guide.*
+ * ["Reassigning a Binding"](../getting-started/data-binding/#reassigning-a-binding) section in the Getting Started guide.*
  */
 template<typename T>
 inline std::unique_ptr<Binding<T, ImmediateBindingEvaluator>> makeBinding(Private::Node<T> &&rootNode)
@@ -292,7 +292,7 @@ inline std::unique_ptr<Binding<T, ImmediateBindingEvaluator>> makeBinding(Privat
  *          The Binding will feature immediate evaluation.
  *
  * *Note: For the difference between makeBinding and makeBoundProperty, see the
- * ["Reassigning a Binding"](../../getting-started/data-binding/#reassigning-a-binding) section in the Getting Started guide.*
+ * ["Reassigning a Binding"](../getting-started/data-binding/#reassigning-a-binding) section in the Getting Started guide.*
  */
 template<typename Func, typename... Args, typename = std::enable_if_t<sizeof...(Args) != 0>, typename ResultType = Private::operator_node_result_t<Func, Args...>>
 inline std::unique_ptr<Binding<ResultType, ImmediateBindingEvaluator>> makeBinding(Func &&func, Args &&...args)
@@ -322,7 +322,7 @@ inline std::unique_ptr<Binding<ResultType, ImmediateBindingEvaluator>> makeBindi
  * @return Property A new Property that is bound to the inputs
  *
  * *Note: For the difference between makeBinding and makeBoundProperty, see the
- * ["Reassigning a Binding"](../../getting-started/data-binding/#reassigning-a-binding) section in the Getting Started guide.*
+ * ["Reassigning a Binding"](../getting-started/data-binding/#reassigning-a-binding) section in the Getting Started guide.*
  */
 template<typename... T>
 inline auto makeBoundProperty(T &&...args)
