@@ -51,6 +51,8 @@ public:
 
     ConnectionEvaluator &operator=(ConnectionEvaluator &&other) noexcept = delete;
 
+    virtual ~ConnectionEvaluator() = default;
+
     /**
      * @brief Evaluate the deferred connections.
      *
@@ -67,14 +69,35 @@ public:
         m_deferredSlotInvocations.clear();
     }
 
+protected:
+    /**
+     * @brief Called when a new slot invocation is added.
+     *
+     * This function can be overwritten by subclasses to get notified whenever a new invocation is added to this evaluator.
+     * The default implementation does nothing and does not have to be called by subclasses when overriding.
+     *
+     * ⚠️  *Note that this function will be executed on the thread that enqueued the slot invocation (i.e. the thread that called .emit() on the signal),
+     * which is usually not the thread that is responsible for evaluating the connections!
+     * Therefore it is usually not correct to call evaluateDeferredConnections() within this function!
+     * User code is responsible for ensuring that the threads are synchronized correctly.*
+     *
+     * For example, if you plan to evaluate (execute) the slot invocations in some "main" thread A
+     * and a signal is emitted in thread B, than this method will be called on thread B.
+     * It is a good place to "wake up" the event loop of thread A so that thread A can call `evaluateDeferredConnections()`.
+     */
+    virtual void onInvocationAdded() { }
+
 private:
     template<typename...>
     friend class Signal;
 
     void enqueueSlotInvocation(const ConnectionHandle &handle, const std::function<void()> &slotInvocation)
     {
-        std::lock_guard<std::mutex> lock(m_slotInvocationMutex);
-        m_deferredSlotInvocations.push_back({ handle, std::move(slotInvocation) });
+        {
+            std::lock_guard<std::mutex> lock(m_slotInvocationMutex);
+            m_deferredSlotInvocations.push_back({ handle, std::move(slotInvocation) });
+        }
+        onInvocationAdded();
     }
 
     void dequeueSlotInvocation(const ConnectionHandle &handle)
