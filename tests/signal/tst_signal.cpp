@@ -446,6 +446,42 @@ TEST_CASE("Signal connections")
     }
 }
 
+TEST_CASE("ConnectionEvaluator")
+{
+    SUBCASE("Subclassing ConnectionEvaluator")
+    {
+        class MyConnectionEvaluator : public ConnectionEvaluator
+        {
+        protected:
+            void onInvocationAdded() override
+            {
+                m_count++;
+            }
+
+        public:
+            int m_count = 0;
+        };
+
+        Signal<> signal;
+
+        auto evaluator = std::make_shared<MyConnectionEvaluator>();
+
+        auto evaluated = false;
+        (void)signal.connectDeferred(evaluator, [&evaluated]() { evaluated = true; });
+
+        REQUIRE(evaluator->m_count == 0);
+        signal.emit();
+
+        REQUIRE(evaluator->m_count == 1);
+        REQUIRE_FALSE(evaluated);
+
+        evaluator->evaluateDeferredConnections();
+
+        REQUIRE(evaluator->m_count == 1);
+        REQUIRE(evaluated);
+    }
+}
+
 TEST_CASE("Moving")
 {
     SUBCASE("a move constructed signal keeps the connections")
