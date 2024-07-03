@@ -157,8 +157,7 @@ class Signal
         }
 
         // Disconnects all previously connected functions
-        void
-        disconnectAll()
+        void disconnectAll()
         {
             const auto numEntries = m_connections.entriesSize();
 
