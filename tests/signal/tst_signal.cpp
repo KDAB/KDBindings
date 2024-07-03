@@ -97,6 +97,177 @@ TEST_CASE("Signal connections")
         REQUIRE(lambdaCalled == true);
     }
 
+    SUBCASE("A signal with arguments can be connected to a lambda and invoked with const l-value args")
+    {
+        Signal<std::string, int> signal;
+        bool lambdaCalled = false;
+        const auto result = signal.connect([&lambdaCalled](std::string, int) {
+            lambdaCalled = true;
+        });
+
+        REQUIRE(result.isActive());
+
+        const std::string a = "The answer:";
+        const int b = 42;
+        signal.emit(a, b);
+        REQUIRE(lambdaCalled == true);
+    }
+
+    SUBCASE("A signal can be connected to a member function and invoked")
+    {
+        Button button;
+        Handler handler;
+
+        const auto connection = button.clicked.connect(&Handler::doSomething, &handler);
+        REQUIRE(connection.isActive());
+
+        button.clicked.emit();
+        REQUIRE(handler.handlerCalled == true);
+    }
+
+    SUBCASE("A signal can discard arguments that slots don't need")
+    {
+        Signal<bool, int> signal;
+
+        auto lambdaCalled = false;
+        (void)signal.connect([&lambdaCalled](bool value) { lambdaCalled = value; });
+        signal.emit(true, 5);
+        REQUIRE(lambdaCalled);
+
+        signal.emit(false, 5);
+        REQUIRE_FALSE(lambdaCalled);
+    }
+
+    SUBCASE("A signal can bind arbitrary arguments to the first arguments of a slot")
+    {
+        Signal<int, bool> signal;
+        auto signalValue = 0;
+        auto boundValue = 0;
+
+        (void)signal.connect([&signalValue, &boundValue](int bound, int signalled) {
+            boundValue = bound;
+            signalValue = signalled;
+        },
+                             5);
+
+        // The bound value should not have changed yet.
+        REQUIRE(boundValue == 0);
+
+        signal.emit(10, false);
+
+        REQUIRE(boundValue == 5);
+        REQUIRE(signalValue == 10);
+    }
+
+    SUBCASE("Test Signal documentation example for Signal::connect<>")
+    {
+        Signal<int> signal;
+        std::vector<int> numbers{ 1, 2, 3 };
+        bool emitted = false;
+
+        // disambiguation necessary, as push_back is overloaded.
+        void (std::vector<int>::*push_back)(const int &) = &std::vector<int>::push_back;
+        (void)signal.connect(push_back, &numbers);
+
+        // this slot doesn't require the int argument, so it will be discarded.
+        (void)signal.connect([&emitted]() { emitted = true; });
+
+        signal.emit(4); // Will add 4 to the vector and set emitted to true
+
+        REQUIRE(emitted);
+        REQUIRE(numbers.back() == 4);
+        REQUIRE(numbers.size() == 4);
+    }
+
+    SUBCASE("A signal can be disconnected after being connected")
+    {
+        Signal<> signal;
+        int lambdaCallCount = 0;
+        auto result = signal.connect([&]() {
+            ++lambdaCallCount;
+        });
+
+        int lambdaCallCount2 = 0;
+        (void)signal.connect([&]() {
+            ++lambdaCallCount2;
+        });
+
+        signal.emit();
+        REQUIRE(lambdaCallCount == 1);
+        REQUIRE(lambdaCallCount2 == 1);
+
+        result.disconnect();
+
+        signal.emit();
+        REQUIRE(lambdaCallCount == 1);
+        REQUIRE(lambdaCallCount2 == 2);
+    }
+
+    SUBCASE("A signal can be disconnected inside a slot")
+    {
+        Signal<> signal;
+        ConnectionHandle *handle = nullptr;
+
+        int lambdaCallCount = 0;
+        auto result = signal.connect([&]() {
+            ++lambdaCallCount;
+            handle->disconnect();
+        });
+        handle = &result;
+
+        int lambdaCallCount2 = 0;
+        (void)signal.connect([&]() {
+            ++lambdaCallCount2;
+        });
+
+        signal.emit();
+        REQUIRE(lambdaCallCount == 1);
+        REQUIRE(lambdaCallCount2 == 1);
+
+        signal.emit();
+        REQUIRE(lambdaCallCount == 1);
+        REQUIRE(lambdaCallCount2 == 2);
+    }
+
+    SUBCASE("All signal slots can be disconnected simultaneously")
+    {
+        Signal<> signal;
+        int lambdaCallCount = 0;
+        (void)signal.connect([&]() {
+            ++lambdaCallCount;
+        });
+
+        int lambdaCallCount2 = 0;
+        (void)signal.connect([&]() {
+            ++lambdaCallCount2;
+        });
+
+        signal.emit();
+        REQUIRE(lambdaCallCount == 1);
+        REQUIRE(lambdaCallCount2 == 1);
+
+        signal.disconnectAll();
+
+        signal.emit();
+        REQUIRE(lambdaCallCount == 1);
+        REQUIRE(lambdaCallCount2 == 1);
+    }
+
+    SUBCASE("A signal can be connected via a non-const reference to it")
+    {
+        Signal<int> s;
+        CallbackCounter counter(s);
+
+        s.emit(1);
+        s.emit(2);
+        s.emit(3);
+
+        REQUIRE(counter.m_count == 3);
+    }
+}
+
+TEST_CASE("ConnectionEvaluator")
+{
     SUBCASE("Disconnect Deferred Connection")
     {
         Signal<int> signal1;
@@ -277,177 +448,6 @@ TEST_CASE("Signal connections")
         REQUIRE(lambdaCalled == true);
     }
 
-    SUBCASE("A signal with arguments can be connected to a lambda and invoked with const l-value args")
-    {
-        Signal<std::string, int> signal;
-        bool lambdaCalled = false;
-        const auto result = signal.connect([&lambdaCalled](std::string, int) {
-            lambdaCalled = true;
-        });
-
-        REQUIRE(result.isActive());
-
-        const std::string a = "The answer:";
-        const int b = 42;
-        signal.emit(a, b);
-        REQUIRE(lambdaCalled == true);
-    }
-
-    SUBCASE("A signal can be connected to a member function and invoked")
-    {
-        Button button;
-        Handler handler;
-
-        const auto connection = button.clicked.connect(&Handler::doSomething, &handler);
-        REQUIRE(connection.isActive());
-
-        button.clicked.emit();
-        REQUIRE(handler.handlerCalled == true);
-    }
-
-    SUBCASE("A signal can discard arguments that slots don't need")
-    {
-        Signal<bool, int> signal;
-
-        auto lambdaCalled = false;
-        (void)signal.connect([&lambdaCalled](bool value) { lambdaCalled = value; });
-        signal.emit(true, 5);
-        REQUIRE(lambdaCalled);
-
-        signal.emit(false, 5);
-        REQUIRE_FALSE(lambdaCalled);
-    }
-
-    SUBCASE("A signal can bind arbitrary arguments to the first arguments of a slot")
-    {
-        Signal<int, bool> signal;
-        auto signalValue = 0;
-        auto boundValue = 0;
-
-        (void)signal.connect([&signalValue, &boundValue](int bound, int signalled) {
-            boundValue = bound;
-            signalValue = signalled;
-        },
-                             5);
-
-        // The bound value should not have changed yet.
-        REQUIRE(boundValue == 0);
-
-        signal.emit(10, false);
-
-        REQUIRE(boundValue == 5);
-        REQUIRE(signalValue == 10);
-    }
-
-    SUBCASE("Test Signal documentation example for Signal::connect<>")
-    {
-        Signal<int> signal;
-        std::vector<int> numbers{ 1, 2, 3 };
-        bool emitted = false;
-
-        // disambiguation necessary, as push_back is overloaded.
-        void (std::vector<int>::*push_back)(const int &) = &std::vector<int>::push_back;
-        (void)signal.connect(push_back, &numbers);
-
-        // this slot doesn't require the int argument, so it will be discarded.
-        (void)signal.connect([&emitted]() { emitted = true; });
-
-        signal.emit(4); // Will add 4 to the vector and set emitted to true
-
-        REQUIRE(emitted);
-        REQUIRE(numbers.back() == 4);
-        REQUIRE(numbers.size() == 4);
-    }
-
-    SUBCASE("A signal can be disconnected after being connected")
-    {
-        Signal<> signal;
-        int lambdaCallCount = 0;
-        auto result = signal.connect([&]() {
-            ++lambdaCallCount;
-        });
-
-        int lambdaCallCount2 = 0;
-        (void)signal.connect([&]() {
-            ++lambdaCallCount2;
-        });
-
-        signal.emit();
-        REQUIRE(lambdaCallCount == 1);
-        REQUIRE(lambdaCallCount2 == 1);
-
-        result.disconnect();
-
-        signal.emit();
-        REQUIRE(lambdaCallCount == 1);
-        REQUIRE(lambdaCallCount2 == 2);
-    }
-
-    SUBCASE("A signal can be disconnected inside a slot")
-    {
-        Signal<> signal;
-        ConnectionHandle *handle = nullptr;
-
-        int lambdaCallCount = 0;
-        auto result = signal.connect([&]() {
-            ++lambdaCallCount;
-            handle->disconnect();
-        });
-        handle = &result;
-
-        int lambdaCallCount2 = 0;
-        (void)signal.connect([&]() {
-            ++lambdaCallCount2;
-        });
-
-        signal.emit();
-        REQUIRE(lambdaCallCount == 1);
-        REQUIRE(lambdaCallCount2 == 1);
-
-        signal.emit();
-        REQUIRE(lambdaCallCount == 1);
-        REQUIRE(lambdaCallCount2 == 2);
-    }
-
-    SUBCASE("All signal slots can be disconnected simultaneously")
-    {
-        Signal<> signal;
-        int lambdaCallCount = 0;
-        (void)signal.connect([&]() {
-            ++lambdaCallCount;
-        });
-
-        int lambdaCallCount2 = 0;
-        (void)signal.connect([&]() {
-            ++lambdaCallCount2;
-        });
-
-        signal.emit();
-        REQUIRE(lambdaCallCount == 1);
-        REQUIRE(lambdaCallCount2 == 1);
-
-        signal.disconnectAll();
-
-        signal.emit();
-        REQUIRE(lambdaCallCount == 1);
-        REQUIRE(lambdaCallCount2 == 1);
-    }
-
-    SUBCASE("A signal can be connected via a non-const reference to it")
-    {
-        Signal<int> s;
-        CallbackCounter counter(s);
-
-        s.emit(1);
-        s.emit(2);
-        s.emit(3);
-
-        REQUIRE(counter.m_count == 3);
-    }
-}
-
-TEST_CASE("ConnectionEvaluator")
-{
     SUBCASE("Subclassing ConnectionEvaluator")
     {
         class MyConnectionEvaluator : public ConnectionEvaluator
