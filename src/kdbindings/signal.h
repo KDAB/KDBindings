@@ -16,6 +16,7 @@
 #include <stdexcept>
 #include <type_traits>
 #include <utility>
+#include <forward_list>
 
 #ifdef emit
 static_assert(false, "KDBindings is not compatible with Qt's 'emit' keyword.\n"
@@ -136,6 +137,11 @@ class Signal
         // Disconnects a previously connected function
         void disconnect(const ConnectionHandle &handle) override
         {
+            if (m_isEmitting) {
+                m_connectionsToDisconnect.push_front(handle);
+                return;
+            }
+
             // If the connection evaluator is still valid, remove any queued up slot invocations
             // associated with the given handle to prevent them from being evaluated in the future.
             auto idOpt = handle.m_id; // Retrieve the connection associated with this id
@@ -168,8 +174,6 @@ class Signal
                     disconnect(ConnectionHandle(sharedThis, *indexOpt));
                 }
             }
-
-            m_connections.clear();
         }
 
         bool blockConnection(const Private::GenerationalIndex &id, bool blocked) override
@@ -201,6 +205,10 @@ class Signal
 
         void emit(Args... p)
         {
+            if (m_isEmitting) {
+                throw std::runtime_error("Signal is already emitting, nested emits are not supported!");
+            }
+            m_isEmitting = true;
 
             const auto numEntries = m_connections.entriesSize();
 
@@ -224,6 +232,13 @@ class Signal
                     }
                 }
             }
+            m_isEmitting = false;
+
+            // Remove all slots that were disconnected during the emit
+            while (!m_connectionsToDisconnect.empty()) {
+                disconnect(m_connectionsToDisconnect.front());
+                m_connectionsToDisconnect.pop_front();
+            }
         }
 
     private:
@@ -236,6 +251,15 @@ class Signal
         };
 
         mutable Private::GenerationalIndexArray<Connection> m_connections;
+
+        // If a reflective slot disconnects itself, we need to make sure to not deconstruct the std::function
+        // while it is still running.
+        // Therefore, defer all slot disconnections until the emit is done.
+        //
+        // We deliberately choose a forward_list here for the smaller memory footprint when empty.
+        // This list will only be used as a LIFO stack, which is also O(1) for forward_list.
+        std::forward_list<ConnectionHandle> m_connectionsToDisconnect;
+        bool m_isEmitting = false;
     };
 
 public:
@@ -458,10 +482,15 @@ public:
      * therefore consider using (const) references as the Args to the Signal
      * wherever possible.
      *
-     * Note: Slots may disconnect themselves during an emit, however it is
-     * undefined whether a slot that is connected during the emit function
-     * of the Signal will also be called during this emit, or only at the next
-     * emit.
+     * Note: Slots may disconnect themselves during an emit, which will cause the
+     * connection to be disconnected after all slots have been called.
+     *
+     * ⚠️ *Note: Connecting a new slot to a signal while the signal is still
+     * in the emit function is undefined behavior.*
+     *
+     * ⚠️ *Note: This function is **not thread-safe** and **not reentrant**.
+     * Specifically, this means it is undefined behavior to emit a signal from
+     * a slot of that same signal.*
      */
     void emit(Args... p) const
     {
