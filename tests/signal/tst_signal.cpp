@@ -326,6 +326,51 @@ TEST_CASE("Signal connections")
         signal.emit(a, b);
         REQUIRE(lambdaCalled == true);
     }
+
+    SUBCASE("A reflective connection cannot deconstruct itself while still in use")
+    {
+        class DestructorNotifier
+        {
+        public:
+            DestructorNotifier(bool *flag)
+                : destructorFlag(flag) { }
+
+            ~DestructorNotifier()
+            {
+                if (destructorFlag) {
+                    *destructorFlag = true;
+                }
+            }
+
+            bool *destructorFlag = nullptr;
+        };
+
+        auto destructed = std::make_shared<bool>(false);
+        auto notifier = std::make_shared<DestructorNotifier>(&*destructed);
+
+        Signal<> signal;
+
+        auto handle = signal.connectReflective([destructed, notifier = std::move(notifier)](ConnectionHandle &handle) {
+            REQUIRE_FALSE(*destructed);
+            REQUIRE(handle.isActive());
+            handle.disconnect();
+            // Make sure our own lambda isn't deconstructed while it's runnning.
+            REQUIRE_FALSE(*destructed);
+            // However, the handle will no longer be valid.
+            REQUIRE_FALSE(handle.isActive());
+        });
+
+        // Make sure the notifier has actually been moved into the lambda.
+        // This ensures the lambda has exclusive ownership of the DestructorNotifier.
+        REQUIRE_FALSE(notifier);
+
+        REQUIRE_FALSE(*destructed);
+        REQUIRE(handle.isActive());
+        signal.emit();
+
+        REQUIRE(*destructed);
+        REQUIRE_FALSE(handle.isActive());
+    }
 }
 
 TEST_CASE("ConnectionEvaluator")
