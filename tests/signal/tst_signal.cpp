@@ -264,6 +264,68 @@ TEST_CASE("Signal connections")
 
         REQUIRE(counter.m_count == 3);
     }
+
+    SUBCASE("Single Shot Connection")
+    {
+        Signal<int> mySignal;
+        int val = 5;
+
+        // Connect a reflective slot to the signal
+        auto handle = mySignal.connectReflective([&val](ConnectionHandle &selfHandle, int value) {
+            val += value;
+
+            // Disconnect after handling the signal once
+            selfHandle.disconnect();
+        });
+
+        mySignal.emit(5); // This should trigger the slot and then disconnect it
+
+        REQUIRE(!handle.isActive());
+
+        mySignal.emit(5); // Since the slot is disconnected, this should not affect 'val'
+
+        // Check if the value remains unchanged after the second emit
+        REQUIRE(val == 10); // 'val' was incremented once to 10 by the first emit and should remain at 10
+    }
+
+    SUBCASE("Self-blocking connection")
+    {
+        Signal<int> mySignal;
+        int val = 5;
+
+        auto handle = mySignal.connectReflective([&val](ConnectionHandle &self, int value) {
+            val += value;
+            self.block(true);
+        });
+
+        REQUIRE_FALSE(handle.isBlocked());
+        mySignal.emit(5);
+        REQUIRE(val == 10);
+        REQUIRE(handle.isBlocked());
+
+        mySignal.emit(5);
+        REQUIRE(val == 10);
+
+        handle.block(false);
+        mySignal.emit(5);
+        REQUIRE(val == 15);
+    }
+
+    SUBCASE("A signal with arguments can be connected to a lambda and invoked with l-value args")
+    {
+        Signal<std::string, int> signal;
+        bool lambdaCalled = false;
+        const auto result = signal.connect([&lambdaCalled](std::string, int) {
+            lambdaCalled = true;
+        });
+
+        REQUIRE(result.isActive());
+
+        std::string a = "The answer:";
+        int b = 42;
+        signal.emit(a, b);
+        REQUIRE(lambdaCalled == true);
+    }
 }
 
 TEST_CASE("ConnectionEvaluator")
@@ -430,68 +492,6 @@ TEST_CASE("ConnectionEvaluator")
         // Make sure the other signal still works, even after deconstructing another
         // signal that was connected to the same evaluator.
         REQUIRE(anotherCalled);
-    }
-
-    SUBCASE("Single Shot Connection")
-    {
-        Signal<int> mySignal;
-        int val = 5;
-
-        // Connect a reflective slot to the signal
-        auto handle = mySignal.connectReflective([&val](ConnectionHandle &selfHandle, int value) {
-            val += value;
-
-            // Disconnect after handling the signal once
-            selfHandle.disconnect();
-        });
-
-        mySignal.emit(5); // This should trigger the slot and then disconnect it
-
-        REQUIRE(!handle.isActive());
-
-        mySignal.emit(5); // Since the slot is disconnected, this should not affect 'val'
-
-        // Check if the value remains unchanged after the second emit
-        REQUIRE(val == 10); // 'val' was incremented once to 10 by the first emit and should remain at 10
-    }
-
-    SUBCASE("Self-blocking connection")
-    {
-        Signal<int> mySignal;
-        int val = 5;
-
-        auto handle = mySignal.connectReflective([&val](ConnectionHandle &self, int value) {
-            val += value;
-            self.block(true);
-        });
-
-        REQUIRE_FALSE(handle.isBlocked());
-        mySignal.emit(5);
-        REQUIRE(val == 10);
-        REQUIRE(handle.isBlocked());
-
-        mySignal.emit(5);
-        REQUIRE(val == 10);
-
-        handle.block(false);
-        mySignal.emit(5);
-        REQUIRE(val == 15);
-    }
-
-    SUBCASE("A signal with arguments can be connected to a lambda and invoked with l-value args")
-    {
-        Signal<std::string, int> signal;
-        bool lambdaCalled = false;
-        const auto result = signal.connect([&lambdaCalled](std::string, int) {
-            lambdaCalled = true;
-        });
-
-        REQUIRE(result.isActive());
-
-        std::string a = "The answer:";
-        int b = 42;
-        signal.emit(a, b);
-        REQUIRE(lambdaCalled == true);
     }
 
     SUBCASE("Subclassing ConnectionEvaluator")
