@@ -65,6 +65,15 @@
             "errors": {
                 "dev": true
             }
+        },
+        {
+            "name": "docs",
+            "displayName": "docs",
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/build-docs",
+            "cacheVariables": {
+                "KDBindings_DOCS" : "ON"
+            }
         }
 
     ],
@@ -84,6 +93,11 @@
         {
             "name": "clang-tidy",
             "configurePreset": "clang-tidy"
+        },
+        {
+            "name": "docs",
+            "configurePreset": "docs",
+            "targets": ["docs"]
         }
     ],
     "testPresets": [
