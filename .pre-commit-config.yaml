@@ -3,7 +3,7 @@
 ci:
     autoupdate_schedule: monthly
 
-exclude: ^(cmake/|3rdparty/)
+exclude: ^(cmake/|3rdparty/|docs/api/doxygen-awesome.css)
 repos:
 - repo: https://github.com/pre-commit/pre-commit-hooks
   rev: v4.5.0
@@ -25,4 +25,6 @@ repos:
   rev: v0.6.13
   hooks:
   - id: cmake-lint
+    exclude: (.py.cmake|Doxyfile.cmake)
   - id: cmake-format
+    exclude: (.py.cmake|Doxyfile.cmake)

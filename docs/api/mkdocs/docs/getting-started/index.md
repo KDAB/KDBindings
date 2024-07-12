@@ -1,4 +1,4 @@
-# Overview
+# Getting Started
 
 ## Installation
 
@@ -17,10 +17,10 @@ cmake --build . --target install # this command might need super user privileges
 ```
 
 ### Windows:
-Navigate to the repository and create a folder named `build`.  
-Navigate into the folder.  
-Use `Shift`+`Right Click` and select `Open command window here`.  
-In the terminal window, run:  
+Navigate to the repository and create a folder named `build`.
+Navigate into the folder.
+Use `Shift`+`Right Click` and select `Open command window here`.
+In the terminal window, run:
 ``` cmd
 cmake ..
 cmake --build . --target install
