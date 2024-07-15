@@ -58,6 +58,8 @@ public:
      *
      * This function is responsible for evaluating and executing deferred connections.
      * This function is thread safe.
+     *
+     * @warning Evaluating slots that throw an exception is currently undefined behavior.
      */
     void evaluateDeferredConnections()
     {
