@@ -329,6 +329,10 @@ public:
      *
      * @return An instance of ConnectionHandle, that can be used to disconnect
      * or temporarily block the connection.
+     *
+     * @warning Connecting functions to a signal that throw an exception when called is currently undefined behavior.
+     * All connected functions should handle their own exceptions.
+     * For backwards-compatibility, the slot function is not required to be noexcept.
      */
     KDBINDINGS_WARN_UNUSED ConnectionHandle connect(std::function<void(Args...)> const &slot)
     {
@@ -346,6 +350,10 @@ public:
      *
      * @param slot A std::function that takes a ConnectionHandle reference followed by the signal's parameter types.
      * @return A ConnectionHandle to the newly established connection, allowing for advanced connection management.
+     *
+     * @warning Connecting functions to a signal that throw an exception when called is currently undefined behavior.
+     * All connected functions should handle their own exceptions.
+     * For backwards-compatibility, the slot function is not required to be noexcept.
      */
     ConnectionHandle connectReflective(std::function<void(ConnectionHandle &, Args...)> const &slot)
     {
@@ -371,6 +379,10 @@ public:
      * @note
      * The Signal class itself is not thread-safe. While the ConnectionEvaluator is inherently
      * thread-safe, ensure that any concurrent access to this Signal is protected externally to maintain thread safety.
+     *
+     * @warning Connecting functions to a signal that throw an exception when called is currently undefined behavior.
+     * All connected functions should handle their own exceptions.
+     * For backwards-compatibility, the slot function is not required to be noexcept.
      */
     KDBINDINGS_WARN_UNUSED ConnectionHandle connectDeferred(const std::shared_ptr<ConnectionEvaluator> &evaluator, std::function<void(Args...)> const &slot)
     {
@@ -410,6 +422,10 @@ public:
      * @return An instance of a Signal::ConnectionHandle that refers to this connection.
      *          Warning: When connecting a member function you must use the returned ConnectionHandle
      *          to disconnect when the object containing the slot goes out of scope!
+     *
+     * @warning Connecting functions to a signal that throw an exception when called is currently undefined behavior.
+     * All connected functions should handle their own exceptions.
+     * For backwards-compatibility, the slot function is not required to be noexcept.
      **/
     // The enable_if_t makes sure that this connect function specialization is only
     // available if we provide a function that cannot be otherwise converted to a
