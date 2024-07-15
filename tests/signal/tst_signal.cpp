@@ -45,7 +45,7 @@ static_assert(std::is_nothrow_default_constructible<ScopedConnection>{});
 static_assert(!std::is_copy_constructible<ScopedConnection>{});
 static_assert(!std::is_copy_assignable<ScopedConnection>{});
 static_assert(std::is_nothrow_move_constructible<ScopedConnection>{});
-static_assert(!std::is_nothrow_move_assignable<ScopedConnection>{});
+static_assert(std::is_nothrow_move_assignable<ScopedConnection>{});
 
 class Button
 {
@@ -513,6 +513,14 @@ TEST_CASE("ConnectionEvaluator")
         evaluator->evaluateDeferredConnections();
 
         REQUIRE(val == 6);
+
+        signal.emit(2);
+        REQUIRE(val == 6);
+
+        evaluator->evaluateDeferredConnections();
+        evaluator->evaluateDeferredConnections();
+
+        REQUIRE(val == 8);
     }
 
     SUBCASE("Disconnect deferred connection from deleted signal")
