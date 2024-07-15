@@ -42,7 +42,7 @@ DOXYFILE_ENCODING      = UTF-8
 # title of most generated pages and in a few other places.
 # The default value is: My Project.
 
-PROJECT_NAME           = "KD SOAP API Documentation"
+PROJECT_NAME           = "@PROJECT_NAME@ API Documentation"
 
 # The PROJECT_NUMBER tag can be used to enter a project or revision number. This
 # could be handy for archiving the generated documentation or if some version
@@ -283,16 +283,7 @@ TAB_SIZE               = 8
 # with the commands \{ and \} for these it is advised to use the version @{ and
 # @} or use a double escape (\\{ and \\})
 
-ALIASES                = "inv=\invariant" \
-                         "since_l=\nThis library was introduced in KD SOAP" \
-                         "since_c=\nThis class was introduced in KD SOAP" \
-                         "since_d=\nThis macro was introduced in KD SOAP" \
-                         "since_f=\nThis function was introduced in KD SOAP" \
-                         "since_e=\nThis enumeration was introduced in KD SOAP" \
-                         "since_p=\nThis property was introduced in KD SOAP" \
-                         "since_v=\nThis enumeration value was introduced in KD SOAP" \
-                         "since_t=\nThis typedef was introduced in KD SOAP" \
-                         "reimp=\internal"
+ALIASES                = "reimp=Reimplemented for internal purposes.\n"
 
 # Set the OPTIMIZE_OUTPUT_FOR_C tag to YES if your project consists of C sources
 # only. Doxygen will then generate output that is more tailored for C. For
@@ -1046,7 +1037,7 @@ EXCLUDE_SYMBOLS        = KDBindings::Private \
 # that contain example code fragments that are included (see the \include
 # command).
 
-EXAMPLE_PATH           = examples
+EXAMPLE_PATH           = "@CMAKE_SOURCE_DIR@/examples"
 
 # If the value of the EXAMPLE_PATH tag contains directories, you can use the
 # EXAMPLE_PATTERNS tag to specify one or more wildcard pattern (like *.cpp and
@@ -2361,7 +2352,8 @@ INCLUDE_FILE_PATTERNS  =
 # recursively expanded use the := operator instead of the = operator.
 # This tag requires that the tag ENABLE_PREPROCESSING is set to YES.
 
-PREDEFINED             =
+PREDEFINED             = "DOCTEST_SYMBOL_EXPORT=" \
+                         "override=override"
 
 # If the MACRO_EXPANSION and EXPAND_ONLY_PREDEF tags are set to YES then this
 # tag can be used to specify a list of macro names that should be expanded. The
@@ -2399,17 +2391,13 @@ SKIP_FUNCTION_MACROS   = YES
 # the path). If a tag file is not located in the directory in which doxygen is
 # run, you must also specify the path to the tagfile here.
 
-TAGFILES               = "@QDOC_TAG_DIR@/qtcore/qtcore.tags=https://doc.qt.io/qt-5/" \
-                         "@QDOC_TAG_DIR@/qtgui/qtgui.tags=https://doc.qt.io/qt-5/" \
-                         "@QDOC_TAG_DIR@/qtwidgets/qtwidgets.tags=https://doc.qt.io/qt-5/" \
-                         "@QDOC_TAG_DIR@/qtnetwork/qtnetwork.tags=https://doc.qt.io/qt-5/" \
-                         "@QDOC_TAG_DIR@/qtxml/qtxml.tags=https://doc.qt.io/qt-5/"
+TAGFILES               =
 
 # When a file name is specified after GENERATE_TAGFILE, doxygen will create a
 # tag file that is based on the input files it reads. See section "Linking to
 # external documentation" for more information about the usage of tag files.
 
-GENERATE_TAGFILE       = @DOXYGEN_OUTPUT_DIR@/kdbindings.tags
+GENERATE_TAGFILE       = "@DOXYGEN_OUTPUT_DIR@/kdbindings.tags"
 
 # If the ALLEXTERNALS tag is set to YES, all external classes and namespaces
 # will be listed in the class and namespace index. If set to NO, only the
