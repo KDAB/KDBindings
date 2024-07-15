@@ -36,9 +36,9 @@ public:
 
     virtual ~SignalImplBase() = default;
 
-    virtual void disconnect(const ConnectionHandle &handle) = 0;
+    virtual void disconnect(const ConnectionHandle &handle) noexcept = 0;
     virtual bool blockConnection(const GenerationalIndex &id, bool blocked) = 0;
-    virtual bool isConnectionActive(const GenerationalIndex &id) const = 0;
+    virtual bool isConnectionActive(const GenerationalIndex &id) const noexcept = 0;
     virtual bool isConnectionBlocked(const GenerationalIndex &id) const = 0;
 };
 
@@ -64,14 +64,14 @@ public:
     /**
      * A ConnectionHandle can be copied.
      **/
-    ConnectionHandle(const ConnectionHandle &) = default;
-    ConnectionHandle &operator=(const ConnectionHandle &) = default;
+    ConnectionHandle(const ConnectionHandle &) noexcept = default;
+    ConnectionHandle &operator=(const ConnectionHandle &) noexcept = default;
 
     /**
      * A ConnectionHandle can be moved.
      **/
-    ConnectionHandle(ConnectionHandle &&) = default;
-    ConnectionHandle &operator=(ConnectionHandle &&) = default;
+    ConnectionHandle(ConnectionHandle &&) noexcept = default;
+    ConnectionHandle &operator=(ConnectionHandle &&) noexcept = default;
 
     /**
      * Disconnect the slot.
@@ -84,8 +84,11 @@ public:
      *
      * After this call, the ConnectionHandle will be inactive (i.e. isActive() returns false)
      * and will no longer belong to any Signal (i.e. belongsTo returns false).
+     *
+     * @warning While this function is marked with noexcept, it *may* terminate the program
+     * if it is not possible to allocate memory or if mutex locking isn't possible.
      **/
-    void disconnect()
+    void disconnect() noexcept
     {
         if (auto shared_impl = checkedLock()) {
             shared_impl->disconnect(*this);
@@ -196,7 +199,7 @@ private:
 
     // Checks that the weak_ptr can be locked and that the connection is
     // still active
-    std::shared_ptr<Private::SignalImplBase> checkedLock() const
+    std::shared_ptr<Private::SignalImplBase> checkedLock() const noexcept
     {
         if (m_id.has_value()) {
             auto shared_impl = m_signalImpl.lock();
@@ -228,7 +231,7 @@ public:
     ScopedConnection() = default;
 
     /** A ScopedConnection can be move constructed */
-    ScopedConnection(ScopedConnection &&) = default;
+    ScopedConnection(ScopedConnection &&) noexcept = default;
 
     /** A ScopedConnection cannot be copied */
     ScopedConnection(const ScopedConnection &) = delete;
@@ -236,7 +239,7 @@ public:
     ScopedConnection &operator=(const ScopedConnection &) = delete;
 
     /** A ScopedConnection can be move assigned */
-    ScopedConnection &operator=(ScopedConnection &&other)
+    ScopedConnection &operator=(ScopedConnection &&other) noexcept
     {
         m_connection.disconnect();
         m_connection = std::move(other.m_connection);
@@ -246,7 +249,7 @@ public:
     /**
      * A ScopedConnection can be constructed from a ConnectionHandle
      */
-    ScopedConnection(ConnectionHandle &&h)
+    ScopedConnection(ConnectionHandle &&h) noexcept
         : m_connection(std::move(h))
     {
     }
@@ -254,7 +257,7 @@ public:
     /**
      * A ScopedConnection can be assigned from a ConnectionHandle
      */
-    ScopedConnection &operator=(ConnectionHandle &&h)
+    ScopedConnection &operator=(ConnectionHandle &&h) noexcept
     {
         return *this = ScopedConnection(std::move(h));
     }
@@ -293,8 +296,11 @@ public:
 
     /**
      * When a ConnectionHandle is destructed it disconnects the connection it guards.
+     *
+     * @warning While this function isn't marked as throwing, it *may* throw and terminate the program
+     * if it is not possible to allocate memory or if mutex locking isn't possible.
      */
-    ~ScopedConnection()
+    ~ScopedConnection() noexcept
     {
         m_connection.disconnect();
     }

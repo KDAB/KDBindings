@@ -61,12 +61,30 @@ public:
      */
     void evaluateDeferredConnections()
     {
-        std::lock_guard<std::mutex> lock(m_slotInvocationMutex);
+        std::lock_guard<std::recursive_mutex> lock(m_slotInvocationMutex);
 
-        for (auto &pair : m_deferredSlotInvocations) {
-            pair.second();
+        if (m_isEvaluating) {
+            // We're already evaluating, so we don't want to re-enter this function.
+            return;
         }
+        m_isEvaluating = true;
+
+        // Current best-effort error handling will remove any further invocations that were queued.
+        // We could use a queue and use a `while(!empty) { pop_front() }` loop instead to avoid this.
+        // However, we would then ideally use a ring-buffer to avoid excessive allocations, which isn't in the STL.
+        try {
+            for (auto &pair : m_deferredSlotInvocations) {
+                pair.second();
+            }
+        } catch (...) {
+            // Best-effort: Reset the ConnectionEvaluator so that it at least doesn't execute the same erroneous slot multiple times.
+            m_deferredSlotInvocations.clear();
+            m_isEvaluating = false;
+            throw;
+        }
+
         m_deferredSlotInvocations.clear();
+        m_isEvaluating = false;
     }
 
 protected:
@@ -94,15 +112,27 @@ private:
     void enqueueSlotInvocation(const ConnectionHandle &handle, const std::function<void()> &slotInvocation)
     {
         {
-            std::lock_guard<std::mutex> lock(m_slotInvocationMutex);
+            std::lock_guard<std::recursive_mutex> lock(m_slotInvocationMutex);
             m_deferredSlotInvocations.push_back({ handle, std::move(slotInvocation) });
         }
         onInvocationAdded();
     }
 
-    void dequeueSlotInvocation(const ConnectionHandle &handle)
+    // Note: This function is marked with noexcept but may theoretically encounter an exception and terminate the program if locking the mutex fails.
+    // If this does happen though, there's likely something very wrong, so std::terminate is actually a reasonable way to handle this.
+    //
+    // In addition, we do need to use a recursive_mutex, as otherwise a slot from `enqueueSlotInvocation` may theoretically call this function and cause undefined behavior.
+    void dequeueSlotInvocation(const ConnectionHandle &handle) noexcept
     {
-        std::lock_guard<std::mutex> lock(m_slotInvocationMutex);
+        std::lock_guard<std::recursive_mutex> lock(m_slotInvocationMutex);
+
+        if (m_isEvaluating) {
+            // It's too late, we're already evaluating the deferred connections.
+            // We can't remove the invocation now, as it might be currently evaluated.
+            // And removing any invocations would be undefined behavior as we would invalidate
+            // the loop indices in `evaluateDeferredConnections`.
+            return;
+        }
 
         auto handleMatches = [&handle](const auto &invocationPair) {
             return invocationPair.first == handle;
@@ -115,6 +145,10 @@ private:
     }
 
     std::vector<std::pair<ConnectionHandle, std::function<void()>>> m_deferredSlotInvocations;
-    std::mutex m_slotInvocationMutex;
+    // We need to use a recursive mutex here, as `evaluateDeferredConnections` executes arbitrary user code.
+    // This may end up in a call to dequeueSlotInvocation, which locks the same mutex.
+    // We'll also need to add a flag to make sure we don't actually dequeue invocations while we're evaluating them.
+    std::recursive_mutex m_slotInvocationMutex;
+    bool m_isEvaluating = false;
 };
 } // namespace KDBindings

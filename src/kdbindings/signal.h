@@ -135,13 +135,11 @@ class Signal
         }
 
         // Disconnects a previously connected function
-        void disconnect(const ConnectionHandle &handle) override
+        //
+        // WARNING: While this function is marked with noexcept, it *may* terminate the program
+        // if it is not possible to allocate memory or if mutex locking isn't possible.
+        void disconnect(const ConnectionHandle &handle) noexcept override
         {
-            if (m_isEmitting) {
-                m_connectionsToDisconnect.push_front(handle);
-                return;
-            }
-
             // If the connection evaluator is still valid, remove any queued up slot invocations
             // associated with the given handle to prevent them from being evaluated in the future.
             auto idOpt = handle.m_id; // Retrieve the connection associated with this id
@@ -152,18 +150,31 @@ class Signal
 
                 // Retrieve the connection associated with this id
                 auto connection = m_connections.get(id);
+                if (connection && m_isEmitting) {
+                    // We are currently still emitting the signal, so we need to defer the actual
+                    // disconnect until the emit is done.
+                    connection->toBeDisconnected = true;
+                    m_disconnectedDuringEmit = true;
+                    return;
+                }
+
                 if (connection && connection->m_connectionEvaluator.lock()) {
                     if (auto evaluatorPtr = connection->m_connectionEvaluator.lock()) {
                         evaluatorPtr->dequeueSlotInvocation(handle);
                     }
                 }
 
+                // Note: This function may throw if we're out of memory.
+                // As `disconnect` is marked as `noexcept`, this will terminate the program.
                 m_connections.erase(id);
             }
         }
 
         // Disconnects all previously connected functions
-        void disconnectAll()
+        //
+        // WARNING: While this function is marked with noexcept, it *may* terminate the program
+        // if it is not possible to allocate memory or if mutex locking isn't possible.
+        void disconnectAll() noexcept
         {
             const auto numEntries = m_connections.entriesSize();
 
@@ -188,7 +199,7 @@ class Signal
             }
         }
 
-        bool isConnectionActive(const Private::GenerationalIndex &id) const override
+        bool isConnectionActive(const Private::GenerationalIndex &id) const noexcept override
         {
             return m_connections.get(id);
         }
@@ -212,8 +223,8 @@ class Signal
 
             const auto numEntries = m_connections.entriesSize();
 
-            // This loop can tolerate signal handles being disconnected inside a slot,
-            // but adding new connections to a signal inside a slot will still be undefined behaviour
+            // This loop can *not* tolerate new connections being added to the signal inside a slot
+            // Doing so will be undefined behavior
             for (auto i = decltype(numEntries){ 0 }; i < numEntries; ++i) {
                 const auto index = m_connections.indexAtEntry(i);
 
@@ -234,10 +245,22 @@ class Signal
             }
             m_isEmitting = false;
 
-            // Remove all slots that were disconnected during the emit
-            while (!m_connectionsToDisconnect.empty()) {
-                disconnect(m_connectionsToDisconnect.front());
-                m_connectionsToDisconnect.pop_front();
+            if (m_disconnectedDuringEmit) {
+                m_disconnectedDuringEmit = false;
+
+                // Because m_connections is using a GenerationIndexArray, this loop can tolerate
+                // deletions inside the loop. So iterating over the array and deleting entries from it
+                // should not lead to undefined behavior.
+                for (auto i = decltype(numEntries){ 0 }; i < numEntries; ++i) {
+                    const auto index = m_connections.indexAtEntry(i);
+
+                    if (index.has_value()) {
+                        const auto con = m_connections.get(index.value());
+                        if (con->toBeDisconnected) {
+                            disconnect(ConnectionHandle(shared_from_this(), index));
+                        }
+                    }
+                }
             }
         }
 
@@ -248,6 +271,9 @@ class Signal
             std::function<void(ConnectionHandle &, Args...)> slotReflective;
             std::weak_ptr<ConnectionEvaluator> m_connectionEvaluator;
             bool blocked{ false };
+            // When we disconnect while the signal is still emitting, we need to defer the actual disconnection
+            // until the emit is done. This flag is set to true when the connection should be disconnected.
+            bool toBeDisconnected{ false };
         };
 
         mutable Private::GenerationalIndexArray<Connection> m_connections;
@@ -256,10 +282,15 @@ class Signal
         // while it is still running.
         // Therefore, defer all slot disconnections until the emit is done.
         //
-        // We deliberately choose a forward_list here for the smaller memory footprint when empty.
-        // This list will only be used as a LIFO stack, which is also O(1) for forward_list.
-        std::forward_list<ConnectionHandle> m_connectionsToDisconnect;
+        // Previously, we stored the ConnectionHandles that were to be disconnected in a list.
+        // However, that would mean that disconnecting cannot be noexcept, as it may need to allocate memory in that list.
+        // We can fix this by storing this information within each connection itself (the toBeDisconnected flag).
+        // Because of the memory layout of the `struct Connection`, this shouldn't even use any more memory.
+        //
+        // The only downside is that we need to iterate over all connections to find the ones that need to be disconnected.
+        // This is helped by using the m_disconnedDuringEmit flag to avoid unnecessary iterations.
         bool m_isEmitting = false;
+        bool m_disconnectedDuringEmit = false;
     };
 
 public:
@@ -281,8 +312,11 @@ public:
      *
      * Therefore, all active ConnectionHandles that belonged to this Signal
      * will no longer be active (i.e. ConnectionHandle::isActive will return false).
+     *
+     * @warning While this function isn't marked as throwing, it *may* throw and terminate the program
+     * if it is not possible to allocate memory or if mutex locking isn't possible.
      */
-    ~Signal()
+    ~Signal() noexcept
     {
         disconnectAll();
     }
@@ -412,8 +446,11 @@ public:
      *
      * All currently active ConnectionHandles that belong to this Signal will no
      * longer be active afterwards. (i.e. ConnectionHandle::isActive will return false).
+     *
+     * @warning While this function is marked with noexcept, it *may* terminate the program
+     * if it is not possible to allocate memory or if mutex locking isn't possible.
      */
-    void disconnectAll()
+    void disconnectAll() noexcept
     {
         if (m_impl) {
             m_impl->disconnectAll();
