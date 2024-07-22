@@ -40,7 +40,7 @@ Expected output:
 Hello World!
 ```
 
-For the full class reference, see: [KDBindings::Signal](../classKDBindings_1_1Signal.md).
+For the full class reference, see: KDBindings::Signal.
 
 ## KDBindings Slots
 In KDBindings, a slot is anything that can be invoked, so any function, lambda or other object that implements the `operator()`.
@@ -78,15 +78,15 @@ KDBindings expects the member function first, and the pointer to the class objec
 
 See the examples:
 
-- [02-signal-member](../02-signal-member_2main_8cpp-example.md)
-- [03-member-arguments](../03-member-arguments_2main_8cpp-example.md)
-- [07-advanced connections](../07-advanced-connections_2main_8cpp-example.md)
+- [02-signal-member](./02-signal-member_2main_8cpp-example.html)
+- [03-member-arguments](./03-member-arguments_2main_8cpp-example.html)
+- [07-advanced connections](./07-advanced-connections_2main_8cpp-example.html)
 
-Also see the [documentation of the connect function](../classKDBindings_1_1Signal.md#function-connect).
+Also see the documentation of the [connect](@ref KDBindings::Signal::connect) function.
 
 ## Managing a connection
 
-Calling the connect function of a Signal returns a [KDBindings::ConnectionHandle](../classKDBindings_1_1ConnectionHandle.md).
+Calling the connect function of a Signal returns a KDBindings::ConnectionHandle.
 These objects reference the connection and can be used to disconnect or temporarily block it.
 
 It's important to note that, unlike Qt, KDBindings requires you to manually disconnect a connection when any of the bound arguments are destroyed.
@@ -94,7 +94,7 @@ For that purpose it's important to keep the ConnectionHandle around!
 You must use it to disconnect the connection, should the object that contains the slot go out of scope!
 Otherwise, you will encounter a dangling pointer whenever the Signal is emitted.
 
-For further information, see the [KDBindings::ConnectionHandle](../classKDBindings_1_1ConnectionHandle.md) documentation.
+For further information, see the KDBindings::ConnectionHandle documentation.
 
 ## Some Notes on Mutability and const Best Practices
 
