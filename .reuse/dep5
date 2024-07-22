@@ -17,6 +17,11 @@ Files: cmake/ECM/modules/*
 Copyright:
 License: BSD-3-Clause
 
+#misc config files
+Files: .pre-commit-config.yaml .codespellrc .krazy .cmake-format.py .clang-format .clazy .gitignore .mdlrc .mdlrc.rb .pep8 .pylintrc docs/api/Doxyfile.cmake distro/*
+Copyright: Klarälvdalens Datakonsult AB, a KDAB Group company <info@kdab.com>
+License: BSD-3-Clause
+
 #3rdparty C++
 Files: src/kdbindings/genindex_array.h
 Copyright: 2021 Jeremy Burns
@@ -24,4 +29,9 @@ License: MIT
 
 Files: tests/doctest/doctest.h
 Copyright: 2016-2021 Viktor Kirilov <vik.kirilov@gmail.com>
+License: MIT
+
+# doxygen awesome
+Files: docs/api/doxygen-awesome.css
+Copyright: 2021 - 2023 jothepro
 License: MIT
