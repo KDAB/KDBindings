@@ -798,6 +798,16 @@ TEST_CASE("ConnectionHandle")
         REQUIRE_FALSE(handle.belongsTo(signal));
         REQUIRE(handle.belongsTo(otherSignal));
     }
+
+    SUBCASE("A ConnectinHandle can be released to ignore the nodiscard warning")
+    {
+        bool called = false;
+        {
+            Signal<int> mySignal;
+            // As long as this compiles without error, the test can pass, no need to REQUIRE anything
+            mySignal.connect([&called]() { called = true; }).release();
+        }
+    }
 }
 
 TEST_CASE("ScopedConnection")
