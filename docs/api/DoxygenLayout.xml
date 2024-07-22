@@ -1,10 +1,11 @@
 <doxygenlayout version="1.0">
   <navindex>
     <tab type="mainpage" visible="yes" title="Home"/>
-    <tab type="pages" visible="yes" title="Getting Started"/>
+    <tab type="pages" visible="yes" title="Getting Started" intro="Get Started with KDBindings by learning about the concepts"/>
     <tab type="modules" visible="yes" title="Modules"/>
-    <tab type="namespaces" visible="yes" title="Namespaces"/>
-    <tab type="classes" visible="yes" title="Classes"/>
-    <tab type="files" visible="yes" title="Files"/>
+    <tab type="user" visible="yes" title="Namespace" url="@ref KDBindings"/>
+    <tab type="classlist" visible="yes" title="Classes"/>
+    <tab type="examples" visible="yes" title=""/>
+    <tab type="filelist" visible="yes" title="Files"/>
   </navindex>
 </doxygenlayout>

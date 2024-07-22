@@ -30,10 +30,10 @@ add_custom_target(
     docs
     # Execute Doxygen
     COMMAND ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile
-    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/mkdocs ${DOXYGEN_OUTPUT_DIR}/mkdocs
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/docs ${DOXYGEN_OUTPUT_DIR}/docs
     # copy some files by-hand that are referred to by the markdown README.
     COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_SOURCE_DIR}/LICENSES/MIT.txt
-            ${DOXYGEN_OUTPUT_DIR}/mkdocs/docs/license.md
+            ${DOXYGEN_OUTPUT_DIR}/docs/license.md
     DEPENDS ${_dox_deps} ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
     COMMENT "Building Documentation"

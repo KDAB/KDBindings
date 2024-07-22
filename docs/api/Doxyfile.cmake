@@ -815,7 +815,7 @@ FILE_VERSION_FILTER    =
 # DoxygenLayout.xml, doxygen will parse it automatically even if the LAYOUT_FILE
 # tag is left empty.
 
-# LAYOUT_FILE            = @CMAKE_CURRENT_SOURCE_DIR@/DoxygenLayout.xml
+LAYOUT_FILE            = @CMAKE_CURRENT_SOURCE_DIR@/DoxygenLayout.xml
 
 # The CITE_BIB_FILES tag can be used to specify one or more bib files containing
 # the reference definitions. This must be a list of .bib files. The .bib
@@ -943,9 +943,14 @@ WARN_LOGFILE           = doxygen.log
 # spaces. See also FILE_PATTERNS and EXTENSION_MAPPING
 # Note: If this tag is empty the current directory is searched.
 
+                         # The order is important here, as it defines in what order the
+                         # pages show up in the "Getting Started" guide.
 INPUT                  = "@CMAKE_SOURCE_DIR@/README.md" \
                          "@CMAKE_SOURCE_DIR@/src" \
-                         "@CMAKE_SOURCE_DIR@/docs/api/mkdocs/docs/getting-started" \
+                         "@CMAKE_CURRENT_SOURCE_DIR@/docs/getting-started/index.md" \
+                         "@CMAKE_CURRENT_SOURCE_DIR@/docs/getting-started/signals-slots.md" \
+                         "@CMAKE_CURRENT_SOURCE_DIR@/docs/getting-started/properties.md" \
+                         "@CMAKE_CURRENT_SOURCE_DIR@/docs/getting-started/data-binding.md" \
 
 # This tag can be used to specify the character encoding of the source files
 # that doxygen parses. Internally doxygen uses the UTF-8 encoding. Doxygen uses
