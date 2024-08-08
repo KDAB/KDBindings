@@ -180,6 +180,23 @@ public:
         return false;
     }
 
+    /**
+     * This function exists to intentionally silence the [[nodiscard]] warning generated when connecting.
+     *
+     * In cases where you know for certain that the lifetime of the signal does not extend beyond the lifetime of the slot, you may not need the ConnectionHandle, so you can use release to discard it.
+     *
+     * Example:
+     * ```cpp
+     * bool called = false;
+     * {
+     *     Signal<int> mySignal;
+     *     // The signal will not outlive the reference to the `called` bool, so it's fine to ignore the ConnectionHandle.
+     *     mySignal.connect([&called](){ called = true; }).release();
+     * }
+     * ```
+     */
+    void release() const { }
+
 private:
     template<typename...>
     friend class Signal;

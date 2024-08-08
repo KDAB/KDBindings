@@ -355,7 +355,7 @@ public:
      * All connected functions should handle their own exceptions.
      * For backwards-compatibility, the slot function is not required to be noexcept.
      */
-    ConnectionHandle connectReflective(std::function<void(ConnectionHandle &, Args...)> const &slot)
+    KDBINDINGS_WARN_UNUSED ConnectionHandle connectReflective(std::function<void(ConnectionHandle &, Args...)> const &slot)
     {
         ensureImpl();
 
