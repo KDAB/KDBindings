@@ -3,7 +3,8 @@ Upstream-Name: KDBindings
 Upstream-Contact:  <info@kdab.com>
 Source: https://www.github.com/KDAB/KDBindings
 
-Files: *.json *.html *.md docs/api/Doxyfile.cmake docs/api/mkdocs/mkdocs.yml docs/api/mkdocs/docs/stylesheets/kdab.css
+#documentation
+Files: README.md ChangeLog docs/api/*
 Copyright: Klarälvdalens Datakonsult AB, a KDAB Group company <info@kdab.com>
 License: MIT
 
@@ -14,11 +15,11 @@ License: MIT
 
 #3rdparty cmake
 Files: cmake/ECM/modules/*
-Copyright:
+Copyright: The KDE Project
 License: BSD-3-Clause
 
 #misc config files
-Files: .pre-commit-config.yaml .codespellrc .krazy .cmake-format.py .clang-format .clazy .gitignore .mdlrc .mdlrc.rb .pep8 .pylintrc docs/api/Doxyfile.cmake distro/*
+Files: .pre-commit-config.yaml .codespellrc .krazy .cmake-format.py .clang-format .clazy .gitignore .mdlrc .mdlrc.rb .pep8 .pylintrc CMakePresets.json CMakeSettings.json docs/api/Doxyfile.cmake distro/*
 Copyright: Klarälvdalens Datakonsult AB, a KDAB Group company <info@kdab.com>
 License: BSD-3-Clause
 
