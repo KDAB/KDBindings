@@ -10,7 +10,8 @@
 
 # Doxygen
 find_package(Doxygen)
-set_package_properties(Doxygen PROPERTIES
+set_package_properties(
+  Doxygen PROPERTIES
   TYPE OPTIONAL
   DESCRIPTION "API Documentation system"
   URL "https://www.doxygen.org"

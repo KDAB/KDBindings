@@ -8,11 +8,13 @@
 # Contact KDAB at <info@kdab.com> for commercial licensing options.
 #
 
-project(test-signal VERSION 0.1 LANGUAGES CXX)
-
-add_executable(${PROJECT_NAME}
-    tst_signal.cpp
+project(
+  test-signal
+  VERSION 0.1
+  LANGUAGES CXX
 )
+
+add_executable(${PROJECT_NAME} tst_signal.cpp)
 
 target_link_libraries(${PROJECT_NAME} KDAB::KDBindings)
 
@@ -21,9 +23,9 @@ target_link_libraries(${PROJECT_NAME} KDAB::KDBindings)
 # IMHO, this is ridiculous, std::thread is part of the standard library, it should just work
 # when I use C++, but it is what it is.
 # See: https://cmake.cmake.narkive.com/wWDhK9RQ/undefined-reference-to-pthread-create
-if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-    find_package (Threads)
-    target_link_libraries(${PROJECT_NAME} ${CMAKE_THREAD_LIBS_INIT})
+if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+  find_package(Threads)
+  target_link_libraries(${PROJECT_NAME} ${CMAKE_THREAD_LIBS_INIT})
 endif()
 
 add_test(${PROJECT_NAME} ${PROJECT_NAME})

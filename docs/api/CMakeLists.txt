@@ -10,14 +10,14 @@
 
 # dot should come with Doxygen find_package(Doxygen)
 if(DOXYGEN_DOT_EXECUTABLE)
-    set(HAVE_DOT "YES")
+  set(HAVE_DOT "YES")
 else()
-    # cmake-lint: disable=C0301
-    set(HAVE_DOT "NO")
-    message(
-        STATUS
-            "Unable to provide inheritance diagrams for the API documentation. To fix, install the graphviz project from https://www.graphviz.org"
-    )
+  # cmake-lint: disable=C0301
+  set(HAVE_DOT "NO")
+  message(
+    STATUS
+      "Unable to provide inheritance diagrams for the API documentation. To fix, install the graphviz project from https://www.graphviz.org"
+  )
 endif()
 
 file(GLOB _dox_deps *.dox *.html)
@@ -27,19 +27,19 @@ set(DOXYGEN_OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR})
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.cmake ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile)
 
 add_custom_target(
-    docs
-    # Execute Doxygen
-    COMMAND ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile
-    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/docs ${DOXYGEN_OUTPUT_DIR}/docs
-    # copy some files by-hand that are referred to by the markdown README.
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_SOURCE_DIR}/LICENSES/MIT.txt
-            ${DOXYGEN_OUTPUT_DIR}/docs/license.md
-    DEPENDS ${_dox_deps} ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile
-    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-    COMMENT "Building Documentation"
+  docs
+  # Execute Doxygen
+  COMMAND ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile
+  COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/docs ${DOXYGEN_OUTPUT_DIR}/docs
+  # copy some files by-hand that are referred to by the markdown README.
+  COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_SOURCE_DIR}/LICENSES/MIT.txt
+          ${DOXYGEN_OUTPUT_DIR}/docs/license.md
+  DEPENDS ${_dox_deps} ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile
+  WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+  COMMENT "Building Documentation"
 )
 
 # The tags file is only created when 'make docs' is run first
 if(EXISTS "${DOXYGEN_OUTPUT_DIR}/kdbindings.tags")
-    install(FILES ${DOXYGEN_OUTPUT_DIR}/kdbindings.tags DESTINATION ${INSTALL_DOC_DIR})
+  install(FILES ${DOXYGEN_OUTPUT_DIR}/kdbindings.tags DESTINATION ${INSTALL_DOC_DIR})
 endif()
