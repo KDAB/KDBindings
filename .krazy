@@ -23,6 +23,6 @@ SKIP /mkdocs.yml.cmake
 SKIP /KDBindingsConfig.cmake.in
 #skip more files
 SKIP CMakePresets.json
+SKIP \.cmake-format\.py
 #skip the borrowed code in the cmake subdir
 SKIP /cmake/ECM/|/cmake/InstallLocation.cmake
-
