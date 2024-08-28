@@ -1,17 +1,23 @@
 # Data Binding
 
-[Data Binding](https://en.wikipedia.org/wiki/Data_binding), or [Property Binding](https://doc.qt.io/qt-5/qtqml-syntax-propertybinding.html) in Qt terminology, is a programming paradigm that allows binding of data sources to their respective consumers.
-That means that if a value depends on another, it will automatically be updated whenever the input value changes.
+[Data Binding](https://en.wikipedia.org/wiki/Data_binding), or
+[Property Binding](https://doc.qt.io/qt-5/qtqml-syntax-propertybinding.html) in Qt terminology,
+is a programming paradigm that allows binding of data sources to their respective consumers.
+That means that if a value depends on another, it will automatically be updated whenever the
+input value changes.
 
 ## Basic Data Binding in KDBindings
+
 The basis for Data Binding in KDBindings is formed by [Properties](@ref KDBindings::Property).
 
-They can be combined using arithmetic operators or just plain functions, to create new properties that are bound to the input properties.
-This means the result of the calculation will be updated automatically every time the input of the calculation changes.
+They can be combined using arithmetic operators or just plain functions, to create new properties
+that are bound to the input properties.  This means the result of the calculation will be updated
+automatically every time the input of the calculation changes.
 
 To create a binding, use the free KDBindings::makeBoundProperty function.
 
-### Example
+### Example: basic data binding
+
 ``` cpp
 #include <kdbindings/binding.h>
 
@@ -26,16 +32,19 @@ width = 5;
 std::cout << area << std::endl; // will print 15
 ```
 
-Pretty much all arithmetic operators are supported, as well as combinations of properties with constant values.
+Pretty much all arithmetic operators are supported, as well as combinations of properties with
+constant values.
 
 ## Declaring functions for use in data binding
+
 KDBindings also allows you to declare arbitrary functions as usable in the context of data binding.
 See the [`node_functions.h`](./node__functions_8h.html) file for documentation on the associated macros.
 
 This is already done for some of the `std` arithmetic functions, like abs and floor.
 You can use the KDBINDINGS_DECLARE_STD_FUNCTION macro to declare more of these when necessary.
 
-### Example
+### Example: declaring functions for data binding
+
 ``` cpp
 #include <kdbindings/binding.h>
 
@@ -46,11 +55,13 @@ Property<int> positiveValue = makeBoundProperty(abs(value));
 // positiveValue is 1
 ```
 
-
 ## Binding arbitrary functions
-KDBindings::makeBoundProperty also accepts functions as binding, so arbitrary code can be executed to produce the new property value.
 
-### Example
+KDBindings::makeBoundProperty also accepts functions as binding, so arbitrary code can be executed
+to produce the new property value.
+
+### Example: binding arbitrary functions
+
 ``` cpp
 #include <kdbindings/binding.h>
 
@@ -68,18 +79,22 @@ Property<std::string> lowerCase = makeBoundProperty(
 text = "Hello World!";
 std::cout << lowerCase.get() << std::endl;
 ```
+
 Expected output:
-```
+
+```text
 hello world!
 ```
 
 ## No more broken bindings
+
 A common mistake in data binding is accidentally breaking a binding by assigning a value to it.
 
 With KDBindings this is no longer possible.
 Assigning a value to a property that is the result of a data binding will result in an error!
 
-### Example
+### Example: broken bindings
+
 ``` cpp
 #include <kdbindings/binding.h>
 
@@ -92,21 +107,28 @@ Property<int> result = makeBoundProperty(2 * value);
 result = 5; // this will throw a KDBindings::ReadOnlyProperty error!
 ```
 
-To intentionally remove a binding from a property, use its [`reset`](/ref KDBindings::Property::reset) function.
+To intentionally remove a binding from a property, use its
+[`reset`](/ref KDBindings::Property::reset) function.
 
 ### Reassigning a Binding
-Even though KDBindings prevents you from accidentally overriding a binding with a concrete value, assigning a
-new binding to a Property with an existing binding is possible.
 
-For this, use the KDBindings::makeBinding function instead of KDBindings::makeBoundProperty to create the binding.
+Even though KDBindings prevents you from accidentally overriding a binding with a concrete value,
+assigning a new binding to a Property with an existing binding is possible.
 
-It is also possible to use makeBoundProperty, which will move-assign a new Property into the existing one, therefore completely replacing the existing Property with a new one.
-This means that all signals of the old property will be disconnected (see [signals & slots](signals-slots.md)) and any existing data bindings that depended on the property will be removed, which might not be what you want!
+For this, use the KDBindings::makeBinding function instead of KDBindings::makeBoundProperty to
+create the binding.
 
-Rule of thumb: If you want to create a new property, use makeBoundProperty, if you want to add a new binding to an
-existing Property, use makeBinding.
+It is also possible to use makeBoundProperty, which will move-assign a new Property into the
+existing one, therefore completely replacing the existing Property with a new one.  This means that
+all signals of the old property will be disconnected (see [signals & slots](signals-slots.md)) and
+any existing data bindings that depended on the property will be removed, which might not be what
+you want!
 
-#### Example
+Rule of thumb: If you want to create a new property, use makeBoundProperty, if you want to add
+a new binding to an existing Property, use makeBinding.
+
+#### Example: reassign a binding
+
 ``` cpp
 #include <kdbindings/binding.h>
 
@@ -122,20 +144,23 @@ result = makeBoundProperty(4 * value); // This works too, but will override all 
 // result is now 8
 ```
 
-
 ## Deferred evaluation
+
 KDBindings optionally offers data bindings with controlled, deferred evaluation.
 
-This feature is enabled by passing a KDBindings::BindingEvaluator to makeBoundProperty.
-The binding will then only be evaluated when [`evaluateAll()`](@ref KDbindings::BindingEvaluator::evaluateAll) is called on the evaluator instance.
+This feature is enabled by passing a KDBindings::BindingEvaluator to makeBoundProperty.  The binding
+will then only be evaluated when [`evaluateAll()`](@ref KDbindings::BindingEvaluator::evaluateAll)
+is called on the evaluator instance.
 
-Deferred evaluation is useful to avoid unnecessary reevaluation of a binding, as well as controlling the frequency of binding evaluation.
-Especially in UI applications, only updating the displayed values once per second can help in making them readable, compared to a bunch of values updating at 60Hz.
+Deferred evaluation is useful to avoid unnecessary reevaluation of a binding, as well as controlling
+the frequency of binding evaluation.  Especially in UI applications, only updating the displayed
+values once per second can help in making them readable, compared to a bunch of values updating at 60Hz.
 
-See the [06-lazy-property-bindings](./06-lazy-property-bindings_2main_8cpp-example.html) example for more details on how to use deferred evaluation.
-
+See the [06-lazy-property-bindings](./06-lazy-property-bindings_2main_8cpp-example.html) example for
+more details on how to use deferred evaluation.
 
 ## Further reading
+
 Classes involved in data binding are KDBindings::Property, KDBindings::Binding, and KDBindings::BindingEvaluator.
 
 See KDBindings::makeBoundProperty for the different ways to create a binding.
