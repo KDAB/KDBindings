@@ -33,3 +33,9 @@ repos:
   hooks:
   - id: reuse
     args: [--suppress-deprecation]
+- repo: https://github.com/DavidAnson/markdownlint-cli2
+  rev: v0.12.0
+  hooks:
+  - id: markdownlint-cli2
+    files: \.(md|mdown|markdown)$
+    exclude: (docs/api/docs/license.md)
