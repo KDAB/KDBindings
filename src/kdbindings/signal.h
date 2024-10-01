@@ -376,14 +376,10 @@ public:
      */
     KDBINDINGS_WARN_UNUSED ConnectionHandle connectSingleShot(std::function<void(Args...)> const &slot)
     {
-        ensureImpl();
-
-        auto singleShotSlot = [slot](ConnectionHandle &handle, Args... args) {
+        return connectReflective([slot](ConnectionHandle &handle, Args... args) {
             handle.disconnect();
             slot(args...);
-        };
-
-        return ConnectionHandle{ m_impl, m_impl->connectReflective(singleShotSlot) };
+        }
     }
 
     /**
