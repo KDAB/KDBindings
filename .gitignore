@@ -73,6 +73,7 @@ Thumbs.db
 
 CMakeLists.txt.user
 CMakeLists.txt.user.*
+CMakeUserPresets.json
 *.spv
 .vs/*
 imgui.ini
