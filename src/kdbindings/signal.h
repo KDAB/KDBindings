@@ -379,7 +379,7 @@ public:
         return connectReflective([slot](ConnectionHandle &handle, Args... args) {
             handle.disconnect();
             slot(args...);
-        }
+        });
     }
 
     /**
