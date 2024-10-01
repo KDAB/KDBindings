@@ -363,6 +363,30 @@ public:
     }
 
     /**
+     * Establishes a single-shot connection between a signal and a slot and when the signal is emitted, the connection will be
+     * disconnected and the slot will be called. Note that the slot will be disconnected before it is called. If the slot
+     * triggers another signal emission of the same signal, the slot will not be called again.
+     *
+     * @param slot A std::function that takes the signal's parameter types.
+     * @return An instance of ConnectionHandle, that can be used to disconnect.
+     *
+     * @warning Connecting functions to a signal that throw an exception when called is currently undefined behavior.
+     * All connected functions should handle their own exceptions.
+     * For backwards-compatibility, the slot function is not required to be noexcept.
+     */
+    KDBINDINGS_WARN_UNUSED ConnectionHandle connectSingleShot(std::function<void(Args...)> const &slot)
+    {
+        ensureImpl();
+
+        auto singleShotSlot = [slot](ConnectionHandle &handle, Args... args) {
+            handle.disconnect();
+            slot(args...);
+        };
+
+        return ConnectionHandle{ m_impl, m_impl->connectReflective(singleShotSlot) };
+    }
+
+    /**
      * @brief Establishes a deferred connection between the provided evaluator and slot.
      *
      * @warning Deferred connections are experimental and may be removed or changed in the future.

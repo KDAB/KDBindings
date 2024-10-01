@@ -270,12 +270,9 @@ TEST_CASE("Signal connections")
         Signal<int> mySignal;
         int val = 5;
 
-        // Connect a reflective slot to the signal
-        auto handle = mySignal.connectReflective([&val](ConnectionHandle &selfHandle, int value) {
+        // Connect a single shot slot to the signal
+        auto handle = mySignal.connectSingleShot([&val](int value) {
             val += value;
-
-            // Disconnect after handling the signal once
-            selfHandle.disconnect();
         });
 
         mySignal.emit(5); // This should trigger the slot and then disconnect it
