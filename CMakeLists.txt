@@ -109,3 +109,16 @@ if(${PROJECT_NAME}_IS_ROOT_PROJECT)
 endif()
 
 feature_summary(WHAT ALL INCLUDE_QUIET_PACKAGES FATAL_ON_MISSING_REQUIRED_PACKAGES)
+
+# TODO once cppcheck is passing change --error-exitcode=1 so CI step fails on new errors
+add_custom_target(
+  cppcheck
+  COMMENT "Run cppcheck on sources"
+  USES_TERMINAL
+  WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
+  COMMAND
+    ${CMAKE_COMMAND} -E env cppcheck --project=${PROJECT_BINARY_DIR}/compile_commands.json --enable=all
+    --error-exitcode=0 --language=c++ --inline-suppr --quiet --disable=missingInclude,unusedFunction
+    --check-level=exhaustive --library=qt.cfg -i3rdParty/ --suppress=*:*.moc --suppress=*:*moc_*.cpp -i/cmake/ECM/
+    -i/cmake/KDAB/
+)

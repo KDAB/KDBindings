@@ -26,7 +26,7 @@ jobs:
 
           - name: clazy
             apt_pgks:
-              - clazy
+              - clazy cppcheck
 
     steps:
       - name: Install ninja-build tool
@@ -49,3 +49,7 @@ jobs:
       - name: Build Project
         id: ctest
         run: cmake --build --preset=${{ matrix.config.name }}
+
+      - name: Run cppcheck
+        if: ${{ matrix.config.name == 'clazy' }}
+        run: cmake --build --preset=${{ matrix.config.name }} --target cppcheck
