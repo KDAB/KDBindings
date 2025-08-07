@@ -19,7 +19,7 @@ KDBindings requires a C++ compiler with C++17 support.
 
 Find more information at:
 
-* [detailed browsable API reference](https://kdab.github.io/KDBindings/md__home_runner_work_KDBindings_KDBindings_docs_api_docs_getting_started_index.html)
+* [detailed browsable API reference](https://kdab.github.io/KDBindings/pages.html)
 * [our assorted example programs](https://github.com/KDAB/KDBindings/blob/main/examples)
 
 ## Compatibility with Qt
