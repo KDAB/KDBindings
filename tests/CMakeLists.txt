@@ -20,3 +20,7 @@ add_subdirectory(node)
 add_subdirectory(property)
 add_subdirectory(signal)
 add_subdirectory(utils)
+
+if (UNIX)
+  add_test(NAME "test-forwarding-headers" COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/test_forwarding_headers.sh)
+endif()
